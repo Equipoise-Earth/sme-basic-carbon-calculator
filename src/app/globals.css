@@ -19,3 +19,51 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@font-face {
+  font-family: "Sofia Pro";
+  src: url("/fonts/sofia-pro-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Sofia Pro";
+  src: url("/fonts/sofia-pro-regular-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Sofia Pro";
+  src: url("/fonts/sofia-pro-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Sofia Pro";
+  src: url("/fonts/sofia-pro-medium-italic.woff2") format("woff2");
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Sofia Pro";
+  src: url("/fonts/sofia-pro-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Sofia Pro";
+  src: url("/fonts/sofia-pro-bold-italic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* Apply globally */
+body {
+  font-family: "Sofia Pro", sans-serif;
+  background-color: #F0F0F0; /* Light Grey */
+}
