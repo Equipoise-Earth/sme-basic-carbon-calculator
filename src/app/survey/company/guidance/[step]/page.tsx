@@ -2,28 +2,13 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import SurveyNavigation from "@/components/SurveyNavigation";
 
 export default function CompanyGuidance() {
   const router = useRouter();
   const params = useParams();
   const step = parseInt(params.step as string) || 1;
   const totalGuidanceSteps = 2; // 2 guidance screens
-
-  const handleBack = () => {
-    if (step > 1) {
-      router.push(`/survey/company/guidance/${step - 1}`);
-    } else {
-      router.push(`/survey/introduction/5`); // ✅ Go back to last Introduction step
-    }
-  };
-
-  const handleNext = () => {
-    if (step < totalGuidanceSteps) {
-      router.push(`/survey/company/guidance/${step + 1}`);
-    } else {
-      router.push(`/survey/company/1`); // ✅ Move to Company Data (Step 1)
-    }
-  };
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-lightGrey px-4">
@@ -53,26 +38,15 @@ export default function CompanyGuidance() {
           <h2 className="text-2xl font-bold">Company Data</h2>
         </div>
       </div>
-  
-      {/* Bottom Navigation */}
-      <div className="w-full max-w-4xl flex justify-between mt-6">
-        {/* "Go Back" (Bottom Left) */}
-        {step > 1 ? (
-          <button onClick={() => router.back()} className="px-6 py-3 bg-primary text-white rounded-lg text-lg hover:bg-secondary">
-          ← Go back
-        </button>
-        ) : (
-          <div />
-        )}
-  
-        {/* "Next / Start" (Bottom Right) */}
-        <button
-          onClick={handleNext}
-          className="px-6 py-3 bg-primary text-white rounded-lg text-lg hover:bg-secondary"
-        >
-          {step === 2 ? "Start →" : "Next →"}
-        </button>
-      </div>
+
+        <SurveyNavigation
+        step={step}
+        totalSteps={totalGuidanceSteps}
+        handleNext={() => router.push(step < totalGuidanceSteps ? `/survey/company/guidance/${step + 1}` : `/survey/company/1`)}
+        handleBack={() => router.push(step > 1 ? `/survey/company/guidance/${step - 1}` : `/survey/introduction/5`)}
+        />
+
     </div>
+
   );
 }

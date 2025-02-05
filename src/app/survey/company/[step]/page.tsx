@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import SurveyNavigation from "@/components/SurveyNavigation";
 
 export default function CompanySurvey() {
   const router = useRouter();
@@ -11,18 +12,6 @@ export default function CompanySurvey() {
   const totalSteps = 16; // Placeholder, will adjust as needed
 
   const [inputValue, setInputValue] = useState("");
-
-  const handleNext = () => {
-    if (step < totalSteps) router.push(`/survey/company/${step + 1}`);
-  };
-
-  const handleBack = () => {
-    if (step > 1) {
-      router.push(`/survey/company/${step - 1}`);
-    } else {
-      router.push(`/survey/company/guidance/${totalSteps}`); // ✅ Go back to last Guidance step
-    }
-  };
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-lightGrey px-4">
@@ -66,25 +55,13 @@ export default function CompanySurvey() {
         </div>
         </div>
 
-        {/* Bottom Navigation (Go Back & Continue Buttons) */}
-        <div className="w-full max-w-4xl flex justify-between mt-6">
-        {/* Go Back Button (Only visible if not on step 1) */}
-        {step > 1 ? (
-            <button onClick={handleBack} className="px-6 py-3 bg-primary text-white rounded-lg text-lg hover:bg-secondary">
-            ← Go back
-            </button>
-        ) : (
-            <div />
-        )}
-
-        {/* Continue Button */}
-        <button
-            onClick={handleNext}
-            className="px-6 py-3 bg-primary text-white rounded-lg text-lg hover:bg-secondary"
-        >
-            Continue →
-        </button>
-        </div>
+        <SurveyNavigation
+        step={step}
+        totalSteps={totalSteps}
+        handleNext={() => router.push(step < totalSteps ? `/survey/company/${step + 1}` : null)}
+        handleBack={() => router.push(step > 1 ? `/survey/company/${step - 1}` : `/survey/company/guidance/2`)}
+        previousSectionPath="/survey/company/guidance/2" // ✅ Pass the correct previous section path
+      />
 
     </div>
   );

@@ -27,7 +27,7 @@ export default function IntroductionSurvey() {
     if (step < totalSteps) {
       router.push(`/survey/introduction/${step + 1}`);
     } else {
-      router.push(`/survey/company/guidance/1`); // ✅ Move to Company Guidance (Step 1)
+      router.push(`/survey/company/guidance/1`); // ✅ Move to next section
     }
   };
   
@@ -138,8 +138,8 @@ export default function IntroductionSurvey() {
         totalSteps={totalSteps}
         handleNext={handleNext}
         handleBack={handleBack}
-        isNextDisabled={isNextDisabled()} // ✅ Disable "Continue" if required data missing
-      />
+        nextSectionPath="/survey/company/guidance/1" // ✅ Ensure it moves to next section
+        />
     </div>
   );
 }
