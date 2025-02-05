@@ -25,9 +25,12 @@ export default function CompanySurvey() {
       {/* Top Navigation (Back & Progress) */}
       <div className="w-full max-w-4xl flex justify-between items-center pt-6">
         {step > 1 ? (
-          <button onClick={handleBack} className="text-darkGrey text-sm font-sofia">
-            ← Go back
-          </button>
+          <button
+          onClick={() => router.push("/")}
+          className="text-darkGrey text-sm hover:underline"
+            >
+            Cancel
+            </button>
         ) : (
           <div /> // Keeps alignment when "Go back" is hidden
         )}
@@ -59,16 +62,26 @@ export default function CompanySurvey() {
         </div>
         </div>
 
-      {/* Buttons */}
-      <div className="w-full max-w-4xl flex justify-between mt-6">
-        <button className="text-darkGrey text-sm">Cancel</button>
+        {/* Bottom Navigation (Go Back & Continue Buttons) */}
+        <div className="w-full max-w-4xl flex justify-between mt-6">
+        {/* Go Back Button (Only visible if not on step 1) */}
+        {step > 1 ? (
+            <button onClick={handleBack} className="px-6 py-3 bg-primary text-white rounded-lg text-lg hover:bg-secondary">
+            ← Go back
+            </button>
+        ) : (
+            <div />
+        )}
+
+        {/* Continue Button */}
         <button
-          onClick={handleNext}
-          className="px-6 py-3 bg-primary text-white rounded-lg text-lg hover:bg-secondary"
+            onClick={handleNext}
+            className="px-6 py-3 bg-primary text-white rounded-lg text-lg hover:bg-secondary"
         >
-          {step === 1 ? "Next →" : "Continue →"}
+            Continue →
         </button>
-      </div>
+        </div>
+
     </div>
   );
 }

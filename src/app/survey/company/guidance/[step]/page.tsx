@@ -50,9 +50,9 @@ export default function CompanyGuidance() {
       <div className="w-full max-w-4xl flex justify-between mt-6">
         {/* "Go Back" (Bottom Left) */}
         {step > 1 ? (
-          <button onClick={() => router.back()} className="px-6 py-3 border border-darkGrey text-darkGrey rounded-lg text-lg">
-            ← Go back
-          </button>
+          <button onClick={() => router.back()} className="px-6 py-3 bg-primary text-white rounded-lg text-lg hover:bg-secondary">
+          ← Go back
+        </button>
         ) : (
           <div />
         )}
