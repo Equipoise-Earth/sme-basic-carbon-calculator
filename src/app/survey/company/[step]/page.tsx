@@ -45,9 +45,19 @@ export default function CompanySurvey() {
       {/* Two-Column Layout: Left Teal, Right White */}
         <div className="bg-white rounded-lg shadow-md mt-4 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2">
         {/* Left Column (Teal Section) */}
-        <div className="bg-secondary p-10 text-white flex items-center md:rounded-l-lg">
-            <h2 className="text-2xl font-bold">Company Vehicles</h2>
-        </div>
+            <div className="bg-secondary p-10 text-white flex items-center md:rounded-l-lg relative">
+            
+            {/* SME Logo (Now Correctly in Top-Left) */}
+            <Image 
+                src="/logos/SMECH_logo_white.svg" 
+                alt="SME Climate Hub Logo" 
+                width={120} 
+                height={40} 
+                className="absolute top-4 left-4"
+            />
+
+            <h2 className="text-2xl font-bold ml-16">Company Vehicles</h2> {/* Added margin to prevent overlap */}
+            </div>
 
         {/* Right Column (White Section - Questions) */}
         <div className="p-10">
