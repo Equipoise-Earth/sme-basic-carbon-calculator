@@ -22,19 +22,21 @@ export default function IntroductionSurvey() {
   };
 
   return (
-    <div className="w-full max-w-4xl flex justify-between items-center pt-6">
+    <div className="flex flex-col items-center min-h-screen bg-lightGrey px-4">
+      {/* Top Navigation (Go Back & Step Counter) */}
+      <div className="w-full max-w-4xl flex justify-between items-center pt-6">
         {step > 1 ? (
-            <button onClick={handleBack} className="text-darkGrey text-sm font-sofia">
-              ← Go back
-            </button>
+          <button onClick={handleBack} className="text-darkGrey text-sm font-sofia">
+            ← Go back
+          </button>
         ) : (
-    <div></div> // Keeps alignment when "Go back" is hidden
+          <div /> // Keeps alignment when "Go back" is hidden
         )}
         <p className="text-darkGrey text-sm font-sofia">
-            Step {step} / {totalSteps}
+          Step {step} / {totalSteps}
         </p>
-    </div>
-
+      </div>
+  
       {/* Content Section */}
       <div className="bg-white rounded-lg shadow-md p-10 mt-4 w-full max-w-4xl text-center">
         {/* ✅ STEP 1: WELCOME PAGE */}
@@ -44,7 +46,7 @@ export default function IntroductionSurvey() {
               Welcome to the{" "}
               <span className="text-primary">Business Carbon Calculator</span>
             </h1>
-
+  
             {/* Image */}
             <div className="flex justify-center my-6">
               <Image
@@ -54,7 +56,7 @@ export default function IntroductionSurvey() {
                 height={300}
               />
             </div>
-
+  
             {/* Description */}
             <p className="text-darkGrey">
               We are delighted to partner with you on measuring your company’s CO₂
@@ -62,7 +64,7 @@ export default function IntroductionSurvey() {
               more you get out. To provide you with the most comprehensive insights
               and benchmarks, we need to get to know you first.
             </p>
-
+  
             {/* "Get Started" Button → Goes to Step 2 */}
             <button
               onClick={handleNext}
@@ -169,7 +171,7 @@ export default function IntroductionSurvey() {
               <option value="Manufacturing">Manufacturing</option>
             </select>
             <button
-              onClick={() => router.push("/survey/company/1")} // Moves to next section
+              onClick={() => router.push("/survey/company/guidance/1")} // Moves to next section
               disabled={!inputValue}
               className={`mt-6 px-6 py-3 rounded-lg text-lg ${
                 inputValue ? "bg-primary text-white hover:bg-secondary" : "bg-gray-300 text-gray-500"
