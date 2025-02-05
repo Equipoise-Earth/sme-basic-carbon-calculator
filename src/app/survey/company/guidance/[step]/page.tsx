@@ -68,7 +68,7 @@ export default function CompanyGuidance() {
 
               {/* Step List */}
               <div className="mt-6 space-y-6">
-                {/* Step 1 */}
+  
                 <div className="flex items-start">
                   <h2 className="text-3xl font-bold text-primary w-10 text-right">1.</h2>
                   <div className="ml-4">
@@ -79,18 +79,16 @@ export default function CompanyGuidance() {
                   </div>
                 </div>
 
-                {/* Step 2 */}
                 <div className="flex items-start">
                   <h2 className="text-3xl font-bold text-primary w-10 text-right">2.</h2>
                   <div className="ml-4">
                     <p className="font-bold text-darkGrey">Nothing extra, it all factors in</p>
                     <p className="text-darkGrey">
-                      Normative’s comprehensive emissions engine will attach CO₂ equivalents to the business expenses you provide (large and small). All data that we ask for either factors into your overall emissions estimate or industry benchmarking.
+                      Equipoise’s comprehensive emissions analysis will attach CO₂ equivalents to the business expenses you provide (large and small). All data that we ask for either factors into your overall emissions estimate or industry benchmarking.
                     </p>
                   </div>
                 </div>
 
-                {/* Step 3 */}
                 <div className="flex items-start">
                   <h2 className="text-3xl font-bold text-primary w-10 text-right">3.</h2>
                   <div className="ml-4">
