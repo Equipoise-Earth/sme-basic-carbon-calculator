@@ -17,7 +17,11 @@ export default function CompanySurvey() {
   };
 
   const handleBack = () => {
-    if (step > 1) router.push(`/survey/company/${step - 1}`);
+    if (step > 1) {
+      router.push(`/survey/company/${step - 1}`);
+    } else {
+      router.push(`/survey/company/guidance/${totalSteps}`); // ✅ Go back to last Guidance step
+    }
   };
 
   return (

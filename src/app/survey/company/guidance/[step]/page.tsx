@@ -9,11 +9,19 @@ export default function CompanyGuidance() {
   const step = parseInt(params.step as string) || 1;
   const totalGuidanceSteps = 2; // 2 guidance screens
 
+  const handleBack = () => {
+    if (step > 1) {
+      router.push(`/survey/company/guidance/${step - 1}`);
+    } else {
+      router.push(`/survey/introduction/5`); // ✅ Go back to last Introduction step
+    }
+  };
+
   const handleNext = () => {
     if (step < totalGuidanceSteps) {
       router.push(`/survey/company/guidance/${step + 1}`);
     } else {
-      router.push(`/survey/company/1`); // Start data capture
+      router.push(`/survey/company/1`); // ✅ Move to Company Data (Step 1)
     }
   };
 

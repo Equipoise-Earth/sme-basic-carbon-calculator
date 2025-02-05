@@ -24,8 +24,13 @@ export default function IntroductionSurvey() {
   };
 
   const handleNext = () => {
-    if (step < totalSteps) router.push(`/survey/introduction/${step + 1}`);
+    if (step < totalSteps) {
+      router.push(`/survey/introduction/${step + 1}`);
+    } else {
+      router.push(`/survey/company/guidance/1`); // ✅ Move to Company Guidance (Step 1)
+    }
   };
+  
 
   const handleBack = () => {
     if (step > 1) router.push(`/survey/introduction/${step - 1}`);
