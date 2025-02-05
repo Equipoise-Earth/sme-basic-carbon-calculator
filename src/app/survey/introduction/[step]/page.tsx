@@ -5,6 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import SurveyNavigation from "@/components/SurveyNavigation";
 
+
 export default function IntroductionSurvey() {
   const router = useRouter();
   const params = useParams();
@@ -14,7 +15,7 @@ export default function IntroductionSurvey() {
   const [inputValue, setInputValue] = useState("");
   const [isChecked, setIsChecked] = useState(false);
 
-  // ✅ Function to check if "Continue" should be disabled
+  
   const isNextDisabled = () => {
     if (step === 2 && !isChecked) return true; // Terms checkbox required
     if (step === 3 && !inputValue.trim()) return true; // Company name required
@@ -27,7 +28,7 @@ export default function IntroductionSurvey() {
     if (step < totalSteps) {
       router.push(`/survey/introduction/${step + 1}`);
     } else {
-      router.push(`/survey/company/guidance/1`); // ✅ Move to next section
+      router.push(`/survey/company/guidance/1`); 
     }
   };
   
@@ -39,7 +40,7 @@ export default function IntroductionSurvey() {
   return (
     <div className="flex flex-col items-center min-h-screen bg-lightGrey px-4">
       
-      {/* ✅ NAVIGATION BAR (Cancel + Step Counter) */}
+      {/* NAVIGATION BAR (Cancel + Step Counter) */}
       <div className="w-full max-w-4xl flex justify-between items-center pt-6">
         <button 
           onClick={() => router.push("/")} 
@@ -52,8 +53,20 @@ export default function IntroductionSurvey() {
         </p>
       </div>
 
-      {/* ✅ CONTENT SECTION */}
+      {/* CONTENT SECTION */}
       <div className="bg-white rounded-lg shadow-md p-10 mt-4 w-full max-w-4xl text-center">
+  
+        {/* SME Climate Hub Logo (Centered at Top, Inside White Box) */}
+            <div className="w-full flex justify-center mb-8">
+                <Image
+                src="/logos/SME-Climate-Hub-logo-teal.svg" 
+                alt="SME Climate Hub Logo"
+                width={148}
+                height={40}
+                className="h-auto"
+                />
+            </div>
+
         {step === 1 && (
           <>
             <h1 className="text-3xl font-bold font-sofia">
@@ -132,14 +145,16 @@ export default function IntroductionSurvey() {
         )}
       </div>
 
-      {/* ✅ SURVEY NAVIGATION (BOTTOM) */}
+      {/* SURVEY NAVIGATION (BOTTOM) */}
       <SurveyNavigation
         step={step}
         totalSteps={totalSteps}
         handleNext={handleNext}
         handleBack={handleBack}
-        nextSectionPath="/survey/company/guidance/1" // ✅ Ensure it moves to next section
+        nextSectionPath="/survey/company/guidance/1"
+        isNextDisabled={isNextDisabled()}
         />
+
     </div>
   );
 }

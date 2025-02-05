@@ -1,9 +1,11 @@
+import Image from "next/image"; 
+
 interface SurveyNavigationProps {
     step: number;
     totalSteps: number;
     handleNext: () => void;
     handleBack: () => void;
-    isNextDisabled?: boolean; // ✅ Add a new prop for disabling the button
+    isNextDisabled?: boolean;
   }
   
   export default function SurveyNavigation({
@@ -25,13 +27,26 @@ interface SurveyNavigationProps {
                     if (step === 1 && typeof previousSectionPath !== "undefined") {
                         router.push(previousSectionPath);
                       } else {
-                    handleBack(); // ✅ Normal back navigation
+                    handleBack();
                 }
                 }}
                 className="px-6 py-3 bg-primary text-white rounded-lg text-lg hover:bg-secondary"
             >
                 ← Go back
             </button>
+        
+            {/* Powered by Equipoise Logo */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-2 w-full mt-4 md:mt-0">
+                <span className="text-sm text-darkGrey">Powered by</span>
+                <Image
+                    src="/logos/Equipoise_Logo+Vector.png"
+                    alt="Equipoise Logo"
+                    width={100}
+                    height={40}
+                    className="h-auto"
+                />
+            </div>
+
 
             {/* Continue Button (Handles Section Transitions) */}
             <button
@@ -39,7 +54,7 @@ interface SurveyNavigationProps {
                     if (step === totalSteps && typeof nextSectionPath !== "undefined") {
                         router.push(nextSectionPath);
                       } else {
-                    handleNext(); // ✅ Normal forward navigation
+                    handleNext(); 
                 }
                 }}
                 className={`px-6 py-3 rounded-lg text-lg ${
