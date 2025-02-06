@@ -110,6 +110,29 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
           />
         </div>
 
+        {step === 1 && (
+          <div className="text-center">
+            <h1 className="text-3xl font-bold font-sofia mb-4">
+              Welcome to the <span className="text-primary">Business Carbon Calculator</span>
+            </h1>
+
+            <div className="flex justify-center my-6">
+              <Image 
+                src="/illustrations/Analytics-amico.svg" 
+                alt="Carbon Calculator" 
+                width={400} 
+                height={300} 
+                className="h-auto" 
+              />
+            </div>
+
+            <p className="text-darkGrey text-lg">
+              We’re delighted to partner with you in measuring your company’s CO₂ emissions.  
+              This tool helps you track and reduce your carbon footprint effectively.
+            </p>
+          </div>
+        )}
+
         {/* STEP 2: TERMS & CONDITIONS */}
         {step === 2 && (
           <>
