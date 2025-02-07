@@ -5,8 +5,11 @@
     "rewrites": [
       {
         "source": "**",
-        "destination": "/index.html"
+        "function": "nextApp"
       }
     ]
+  },
+  "functions": {
+    "source": "functions"
   }
 }
