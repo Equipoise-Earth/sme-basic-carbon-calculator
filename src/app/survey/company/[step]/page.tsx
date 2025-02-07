@@ -86,7 +86,7 @@ export default function CompanySurvey() {
     if (step < totalSteps) {
       router.push(`/survey/company/${step + 1}`);
     } else {
-      router.push(`/survey/fuel-energy/1`); // Placeholder for next section
+      router.push(`/report`); // Placeholder for next section
     }
   };
 
@@ -303,12 +303,12 @@ const setLastCalendarYear = () => {
 
       {/* Survey Navigation */}
       <SurveyNavigation
-        step={step}
-        totalSteps={totalSteps}
-        handleNext={handleNext}
-        handleBack={handleBack}
-        isNextDisabled={isNextDisabled()}
-      />
+          step={step}
+          totalSteps={totalSteps}
+          handleNext={handleNext}
+          handleBack={handleBack}
+          isNextDisabled={isNextDisabled()}
+        />
     </div>
   );
 }

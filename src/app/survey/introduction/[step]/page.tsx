@@ -210,6 +210,7 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
         handleBack={handleBack}
         nextSectionPath="/survey/company/guidance/1"
         isNextDisabled={isNextDisabled()}
+        isIntroduction={true} // ✅ Add this flag for introduction steps
       />
     </div>
   );
