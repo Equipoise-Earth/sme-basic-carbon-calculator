@@ -5,14 +5,12 @@
   "targets": {
     "business-carbon-calculator": {
       "hosting": {
-        "staging": [
-          "business-carbon-calculator-staging"
-        ],
-        "production": [
-          "business-carbon-calculator"
-        ]
+        "production": ["business-carbon-calculator"],
+        "staging": ["business-carbon-calculator-staging"]
+      },
+      "functions": {
+        "default": "europe-west6" 
       }
     }
-  },
-  "etags": {}
+  }
 }

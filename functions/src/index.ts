@@ -11,6 +11,13 @@ const app = next({
 const handle = app.getRequestHandler();
 const server = express();
 
+const functions = require("firebase-functions");
+
+exports.nextApp = functions
+  .region('europe-west6') 
+  .https.onRequest(require('./.next/server/app'));
+
+
 app.prepare()
   .then(() => {
     console.log("Next.js app prepared successfully.");
