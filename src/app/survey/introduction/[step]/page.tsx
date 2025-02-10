@@ -6,6 +6,8 @@ import Image from "next/image";
 import SurveyNavigation from "@/components/SurveyNavigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { LOCODE_MAP } from "@/app/data/countries";
+
 
 export default function IntroductionSurvey() {
   const router = useRouter();
@@ -167,7 +169,6 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
           </>
         )}
 
-        {/* STEP 4: COMPANY LOCATION */}
         {step === 4 && (
           <>
             <h1 className="text-2xl font-bold font-sofia">Where is your company located?</h1>
@@ -177,9 +178,11 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
               className="border p-2 rounded w-full mt-4 text-center"
             >
               <option value="">Select a country</option>
-              <option value="UK">United Kingdom</option>
-              <option value="USA">United States</option>
-              <option value="Germany">Germany</option>
+              {Object.keys(LOCODE_MAP).map((country) => (
+                <option key={LOCODE_MAP[country]} value={country}>
+                  {country}
+                </option>
+              ))}
             </select>
           </>
         )}
