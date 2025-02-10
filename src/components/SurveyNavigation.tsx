@@ -48,7 +48,7 @@ export default function SurveyNavigation({
       <div className="flex flex-col md:flex-row items-center justify-center gap-2 w-full mt-4 md:mt-0">
         <span className="text-sm text-darkGrey">Powered by</span>
         <Image
-          src="/logos/Equipoise_Logo+Vector.png"
+          src="/logos/Equipoise_Logo-Vector.png"
           alt="Equipoise Logo"
           width={100}
           height={40}

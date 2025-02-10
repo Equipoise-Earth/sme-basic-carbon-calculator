@@ -30,7 +30,7 @@ export default function Home() {
           height={40} 
         />
         <Image 
-          src="/logos/Equipoise_Logo+Vector.png" 
+          src="/logos/Equipoise_Logo-Vector.png" 
           alt="Equipoise Logo" 
           width={100} 
           height={40} 
