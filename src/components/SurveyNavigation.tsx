@@ -53,6 +53,7 @@ export default function SurveyNavigation({
           width={100}
           height={40}
           className="h-auto"
+          unoptimized 
         />
       </div>
 

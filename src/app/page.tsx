@@ -34,6 +34,7 @@ export default function Home() {
           alt="Equipoise Logo" 
           width={100} 
           height={40} 
+          unoptimized 
         />
       </div>
     </div>
