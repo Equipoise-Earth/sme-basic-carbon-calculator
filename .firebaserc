@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "business-carbon-calculator"
-  }
+  },
+  "targets": {
+    "business-carbon-calculator": {
+      "hosting": {
+        "staging": [
+          "business-carbon-calculator-staging"
+        ],
+        "production": [
+          "business-carbon-calculator"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

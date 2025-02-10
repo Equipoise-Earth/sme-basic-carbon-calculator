@@ -1,11 +1,21 @@
 import { NextConfig } from 'next';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,  // ✅ Ignore TypeScript build errors
   },
   eslint: {
     ignoreDuringBuilds: true, // ✅ Ignore ESLint errors during build
+  },
+  reactStrictMode: true,       // 🔒 Enable React strict mode
+  swcMinify: true,             // ⚡ Enable SWC minifier for faster builds
+  experimental: {
+    optimizeCss: true,         // 🎯 Optimize CSS
+  },
+  images: {
+    unoptimized: !isProd,      // 🖼️ Optimize images in production only
   },
 };
 
