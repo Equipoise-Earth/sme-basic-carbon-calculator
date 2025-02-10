@@ -1,16 +1,27 @@
-// functions/src/index.ts
 import * as functions from "firebase-functions";
-import * as express from "express";
-import * as path from "path";
+import next from "next";
+import express from "express";
 
-const app = express();
-const buildPath = path.join(__dirname, "../../public"); // Match "public" in firebase.json
+console.log("Initializing server...");
 
-app.use(express.static(buildPath));
-
-app.get("/*", (req, res) => {
-  res.sendFile(path.join(buildPath, "index.html"));
+const app = next({
+  dev: false,
+  conf: { distDir: ".next" }, 
 });
+const handle = app.getRequestHandler();
+const server = express();
 
-// Export with the correct name
-exports.nextApp = functions.https.onRequest(app);
+app.prepare()
+  .then(() => {
+    console.log("Next.js app prepared successfully.");
+
+    server.all("*", (req, res) => {
+      console.log(`Handling request for ${req.url}`);
+      return handle(req, res);
+    });
+  })
+  .catch((err) => {
+    console.error("Error during app.prepare():", err);
+  });
+
+exports.nextApp = functions.https.onRequest(server);

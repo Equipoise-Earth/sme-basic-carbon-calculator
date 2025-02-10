@@ -1,11 +1,12 @@
 {
   "hosting": {
+    "site": "business-carbon-calculator",
     "public": "public",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "**",
-        "function": "nextApp"
+        "function": "nextApp" 
       }
     ]
   },
