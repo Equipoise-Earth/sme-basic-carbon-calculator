@@ -10,7 +10,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true, // ✅ Ignore ESLint errors during build
   },
   reactStrictMode: true,       // 🔒 Enable React strict mode
-  swcMinify: true,             // ⚡ Enable SWC minifier for faster builds
   experimental: {
     optimizeCss: true,         // 🎯 Optimize CSS
   },
