@@ -1,9 +1,0 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/page": "app/page.js",
-  "/survey/company/guidance/[step]/page": "app/survey/company/guidance/[step]/page.js",
-  "/survey/company/[step]/page": "app/survey/company/[step]/page.js",
-  "/report/page": "app/report/page.js",
-  "/survey/introduction/[step]/page": "app/survey/introduction/[step]/page.js"
-}
