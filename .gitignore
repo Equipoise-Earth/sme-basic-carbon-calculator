@@ -68,9 +68,8 @@ functions/.next/
 # Scripts 
 scripts/*.sh
 
-# Firebase
-.firebase/
-firestore.indexes.json
-firestore.rules
-firebase-debug.log
-firebase-debug.*
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
