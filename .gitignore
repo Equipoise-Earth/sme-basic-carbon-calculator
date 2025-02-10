@@ -30,15 +30,47 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Environment Files
+.env
+.env.local
+.env.*.local
 
 # vercel
 .vercel
+
+# OS Specific
+.DS_Store
+Thumbs.db
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
-.next/
+# Firebase
+.firebase/
+firestore.indexes.json
+firestore.rules
+firebase-debug.log
+firebase-debug.*
+
+# Build Artifacts
 functions/.next/
+functions/lib/
+functions/node_modules/
+
+# Node.js
+node_modules/
+.next/
+out/
+dist/
+functions/.next/
+
+# Scripts 
+scripts/*.sh
+
+# Firebase
+.firebase/
+firestore.indexes.json
+firestore.rules
+firebase-debug.log
+firebase-debug.*
