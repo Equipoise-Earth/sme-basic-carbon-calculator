@@ -6,12 +6,11 @@ console.log("Initializing server...");
 
 const app = next({
   dev: false,
-  conf: { distDir: ".next" }, 
+  conf: { distDir: ".next" },
 });
 const handle = app.getRequestHandler();
 const server = express();
 
-// Prepare Next.js app
 app.prepare()
   .then(() => {
     console.log("Next.js app prepared successfully.");
@@ -24,9 +23,8 @@ app.prepare()
     console.error("Error during app.prepare():", err);
   });
 
-// ✅ Explicitly deploy separate functions to europe-west6
 exports.nextAppProd = functions
-  .region('europe-west6')
+  .region('europe-west6') 
   .https.onRequest(server);
 
 exports.nextAppStaging = functions
