@@ -24,7 +24,7 @@ app.prepare()
     console.error("Error during app.prepare():", err);
   });
 
-// ✅ Separate functions for prod and staging
+// ✅ Explicitly deploy separate functions to europe-west6
 exports.nextAppProd = functions
   .region('europe-west6')
   .https.onRequest(server);
