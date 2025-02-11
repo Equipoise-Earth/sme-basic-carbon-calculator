@@ -11,17 +11,10 @@ const app = next({
 const handle = app.getRequestHandler();
 const server = express();
 
-const functions = require("firebase-functions");
-
-exports.nextApp = functions
-  .region('europe-west6') 
-  .https.onRequest(require('./.next/server/app'));
-
-
+// Prepare the Next.js app
 app.prepare()
   .then(() => {
     console.log("Next.js app prepared successfully.");
-
     server.all("*", (req, res) => {
       console.log(`Handling request for ${req.url}`);
       return handle(req, res);
@@ -31,4 +24,7 @@ app.prepare()
     console.error("Error during app.prepare():", err);
   });
 
-exports.nextApp = functions.https.onRequest(server);
+// ✅ Deploy to europe-west6 only
+exports.nextApp = functions
+  .region('europe-west6')
+  .https.onRequest(server);
