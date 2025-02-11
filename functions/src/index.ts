@@ -11,7 +11,7 @@ const app = next({
 const handle = app.getRequestHandler();
 const server = express();
 
-// Prepare the Next.js app
+// Prepare Next.js app
 app.prepare()
   .then(() => {
     console.log("Next.js app prepared successfully.");
@@ -24,7 +24,11 @@ app.prepare()
     console.error("Error during app.prepare():", err);
   });
 
-// ✅ Deploy to europe-west6 only
-exports.nextApp = functions
+// ✅ Separate functions for prod and staging
+exports.nextAppProd = functions
+  .region('europe-west6')
+  .https.onRequest(server);
+
+exports.nextAppStaging = functions
   .region('europe-west6')
   .https.onRequest(server);
