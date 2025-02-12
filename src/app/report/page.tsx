@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import { COUNTRIES } from "@/app/data/countries";
 
 export default function Report() {
   const userId = "testUser123";
   const [reportData, setReportData] = useState(null);
-  const [processedData, setProcessedData] = useState([]);  // ✅ New state for processed data
+  const [processedData, setProcessedData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMessages, setErrorMessages] = useState([]); // ✅ Track errors
+
   const router = useRouter();
 
   useEffect(() => {
@@ -20,17 +23,23 @@ export default function Report() {
 
         if (docSnap.exists()) {
           const userData = docSnap.data();
-          const countryCode = mapCountryToLocode(userData.companyLocation);
+          const countryDetails = COUNTRIES.find(
+            (c) => c.locode === userData.companyLocation
+          );
+
+          const regionCode = countryDetails ? countryDetails.locode : "GB";
+          const sourceCode = countryDetails ? countryDetails.sourceCode : "BEIS";
 
           const batchRequests = [
             {
               emission_factor: {
-                activity_id: "electricity-supply_grid-source_supplier_mix",
-                source: "BEIS",
-                region: countryCode,
+                activity_id: "electricity-supply_grid*",
+                source: sourceCode,
+                region: regionCode,
                 year: 2024,
                 source_lca_activity: "electricity_generation",
                 data_version: "^20",
+                year_fallback: true,
               },
               parameters: {
                 energy: parseFloat(userData.electricity) || 1000,
@@ -39,16 +48,14 @@ export default function Report() {
             },
             {
               emission_factor: {
-                activity_id: "homeworking-type_office_equipment_and_heating",
-                source: "BEIS",
-                region: countryCode,
+                activity_id: "homeworking-type_custom",
+                region: regionCode,
                 year: 2024,
                 source_lca_activity: "unknown",
                 data_version: "^20",
               },
               parameters: {
-                time: (parseInt(userData.employees) || 10) * 8 * 220 * 0.5,
-                time_unit: "h",
+                number: (parseInt(userData.employees) || 10) * 8 * 220 * 0.5,
               },
             },
           ];
@@ -70,30 +77,45 @@ export default function Report() {
               scope: "Scope 2",
               scopeCategory: "0",
               scopeCategoryName: "Electricity",
-              dataSource: "BEIS",
             },
             {
               scope: "Scope 3",
               scopeCategory: "7",
               scopeCategoryName: "Homeworking",
-              dataSource: "BEIS",
             },
           ];
 
-          const processed = apiData.results.map((result, index) => ({
-            scope: categories[index].scope,
-            scopeCategory: categories[index].scopeCategory,
-            scopeCategoryName: categories[index].scopeCategoryName,
-            kgCO2e: result.co2e || 0,
-            dataSource: categories[index].dataSource,
-          }));
+          const errors = [];
+          const processed = apiData.results.map((result, index) => {
+            const emissionFactor = result?.emission_factor || {};
 
-          setProcessedData(processed); // ✅ Store processed data for rendering
+            // ✅ Error handling for each batch request
+            if (result?.error) {
+              errors.push({
+                category: categories[index].scopeCategoryName,
+                message: result.error.message || "Unknown error occurred.",
+              });
+            }
+
+            return {
+              scope: categories[index].scope,
+              scopeCategory: categories[index].scopeCategory,
+              scopeCategoryName: categories[index].scopeCategoryName,
+              kgCO2e: result.co2e || 0,
+              dataSource: emissionFactor.source || "Unknown", // ✅ Dynamic source from API
+              yearUsed: emissionFactor.year || "N/A",
+              error: result?.error || null, // ✅ Store error if exists
+            };
+          });
+
+          setErrorMessages(errors); // ✅ Capture errors for display
+          setProcessedData(processed);
 
           await setDoc(doc(db, "users", userId), { emissionsReport: processed }, { merge: true });
         }
       } catch (error) {
         console.error("Error generating report:", error);
+        setErrorMessages([{ category: "General", message: error.message }]); // ✅ Global error handler
       } finally {
         setIsLoading(false);
       }
@@ -101,15 +123,6 @@ export default function Report() {
 
     fetchDataAndCalculateEmissions();
   }, []);
-
-  const mapCountryToLocode = (country: string) => {
-    const locodeMap = {
-      UK: "GB",
-      USA: "US",
-      Germany: "DE",
-    };
-    return locodeMap[country] || "GB";
-  };
 
   if (isLoading) return <p>Loading report...</p>;
 
@@ -126,11 +139,29 @@ export default function Report() {
               <p>Category: {item.scopeCategory}</p>
               <p>Emissions: {item.kgCO2e} kgCO₂e</p>
               <p>Data Source: {item.dataSource}</p>
+              <p>Emission Factor Year: {item.yearUsed}</p>
+
+              {/* ✅ Display error if exists */}
+              {item.error && (
+                <p className="text-red-500 mt-2">⚠️ Error: {item.error.message}</p>
+              )}
             </div>
           ))}
         </div>
       ) : (
         <p>No report data available.</p>
+      )}
+
+      {/* ✅ General Errors */}
+      {errorMessages.length > 0 && (
+        <div className="bg-red-100 p-4 rounded-md mt-4">
+          <h2 className="font-bold text-red-700">Errors Detected:</h2>
+          {errorMessages.map((err, idx) => (
+            <p key={idx} className="text-red-600">
+              <strong>{err.category}:</strong> {err.message}
+            </p>
+          ))}
+        </div>
       )}
 
       <button

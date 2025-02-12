@@ -6,7 +6,7 @@ import Image from "next/image";
 import SurveyNavigation from "@/components/SurveyNavigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { LOCODE_MAP } from "@/app/data/countries";
+import { COUNTRIES } from "@/app/data/countries"; 
 
 
 export default function IntroductionSurvey() {
@@ -92,7 +92,7 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
           onClick={() => router.push("/")}
           className="text-darkGrey text-sm font-sofia hover:underline"
         >
-          Cancel
+          Save & exit
         </button>
         <p className="text-darkGrey text-sm font-sofia">
           Step {step} / {totalSteps}
@@ -174,16 +174,15 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
             <h1 className="text-2xl font-bold font-sofia">Where is your company located?</h1>
             <select
               value={responses.companyLocation}
-              onChange={(e) => saveResponse({ companyLocation: e.target.value })}
-              className="border p-2 rounded w-full mt-4 text-center"
-            >
-              <option value="">Select a country</option>
-              {Object.keys(LOCODE_MAP).map((country) => (
-                <option key={LOCODE_MAP[country]} value={country}>
-                  {country}
-                </option>
-              ))}
-            </select>
+                  onChange={(e) => saveResponse({ companyLocation: e.target.value })}
+                  className="border p-2 rounded w-full mt-4 text-center">
+                  <option value="">Select a country</option>
+                  {COUNTRIES.map((country) => (
+                    <option key={country.locode} value={country.locode}>
+                  {country.name}
+            </option>
+          ))}
+        </select>
           </>
         )}
 
@@ -213,7 +212,7 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
         handleBack={handleBack}
         nextSectionPath="/survey/company/guidance/1"
         isNextDisabled={isNextDisabled()}
-        isIntroduction={true} // ✅ Add this flag for introduction steps
+        isIntroduction={true}
       />
     </div>
   );

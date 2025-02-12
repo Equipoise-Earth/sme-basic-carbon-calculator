@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useRouter } from "next/navigation"; // ✅ Added
+import { useRouter } from "next/navigation";
 
 interface SurveyNavigationProps {
   step: number;
@@ -8,9 +8,10 @@ interface SurveyNavigationProps {
   handleNext: () => void;
   handleBack: () => void;
   isNextDisabled?: boolean;
-  isIntroduction?: boolean; // ✅ Add this prop
-  previousSectionPath?: string; // ✅ Add this prop
-  nextSectionPath?: string;     // ✅ Add this prop
+  isIntroduction?: boolean;
+  isCompanyDataSection?: boolean; 
+  previousSectionPath?: string;
+  nextSectionPath?: string;
 }
 
 export default function SurveyNavigation({
@@ -19,25 +20,38 @@ export default function SurveyNavigation({
   handleNext,
   handleBack,
   isNextDisabled = false,
-  isIntroduction = false, // ✅ Default to false
-  previousSectionPath,    // ✅ Destructure
-  nextSectionPath,        // ✅ Destructure
+  isIntroduction = false,
+  isCompanyDataSection = false,
+  previousSectionPath,
+  nextSectionPath,
 }: SurveyNavigationProps) {
-  const router = useRouter(); // ✅ Use router
+  const router = useRouter();
+
+  const handleForward = () => {
+    if (isCompanyDataSection && step === totalSteps) {
+      router.push("/report"); 
+    } else if (nextSectionPath && step === totalSteps) {
+      router.push(nextSectionPath); 
+    } else {
+      handleNext(); 
+    }
+  };
+
+  const handleBackward = () => {
+    if (step === 1 && previousSectionPath) {
+      router.push(previousSectionPath); 
+    } else {
+      handleBack(); 
+    }
+  };
 
   return (
     <div className="w-full max-w-4xl flex justify-between mt-6">
       
-      {/* Go Back Button (Hidden on Intro Step 1) */}
+      {/* Back Button */}
       {!(isIntroduction && step === 1) && (
         <button
-          onClick={() => {
-            if (step === 1 && previousSectionPath) {
-              router.push(previousSectionPath); // ✅ Navigate back
-            } else {
-              handleBack();
-            }
-          }}
+          onClick={handleBackward}
           className="px-6 py-3 rounded-lg text-lg font-bold transition-all duration-300 ease-in-out bg-secondary text-white border-2 border-white hover:bg-transparent hover:border-2 hover:border-primary hover:text-primary"
         >
           ← GO BACK
@@ -47,17 +61,19 @@ export default function SurveyNavigation({
       {/* Powered by Equipoise Logo */}
       <div className="flex flex-col md:flex-row items-center justify-center gap-2 w-full mt-4 md:mt-0">
         <span className="text-sm text-darkGrey">Powered by</span>
-        <Image
-          src="/logos/Equipoise_Logo-Vector.png"
-          alt="Equipoise Logo"
-          width={100}
-          height={40}
-          className="h-auto"
-          unoptimized 
-        />
+        <a href="https://equipoise.earth" target="_blank" rel="noopener noreferrer">
+          <Image
+            src="/logos/Equipoise_Logo-Vector.png"
+            alt="Equipoise Logo"
+            width={100}
+            height={40}
+            className="h-auto"
+            unoptimized
+          />
+        </a>
       </div>
 
-      {/* Continue / Get Started Button */}
+      {/* Continue / Get Started / Calculate Button */}
       {isIntroduction && step === 1 ? (
         <button
           onClick={handleNext}
@@ -67,21 +83,15 @@ export default function SurveyNavigation({
         </button>
       ) : (
         <button
-          onClick={() => {
-            if (step === totalSteps && nextSectionPath) {
-              router.push(nextSectionPath); // ✅ Navigate forward
-            } else {
-              handleNext();
-            }
-          }}
+          onClick={handleForward}
           className={`px-6 py-3 rounded-lg text-lg font-bold transition-all duration-300 ease-in-out ${
             isNextDisabled
-              ? "bg-gray-400 text-white border-2 border-gray-400 cursor-not-allowed"
+              ? "bg-gray-400 text-white border-2 border-gray-400 cursor-not-allowed"  // ✅ Disabled style
               : "bg-secondary text-white border-2 border-white hover:bg-transparent hover:border-2 hover:border-primary hover:text-primary"
           }`}
-          disabled={isNextDisabled}
+          disabled={isNextDisabled}  // ✅ Simplified disabling logic
         >
-          CONTINUE →
+          {isCompanyDataSection && step === totalSteps ? "CALCULATE!" : "CONTINUE →"}
         </button>
       )}
     </div>

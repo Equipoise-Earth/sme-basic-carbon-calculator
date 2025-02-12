@@ -12,10 +12,9 @@ export default function CompanyGuidance() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-lightGrey px-4">
-      {/* Cancel Button (Now Top Left) */}
       <div className="w-full max-w-4xl pt-6 flex justify-between">
         <button onClick={() => router.push("/")} className="text-darkGrey text-sm">
-          Cancel
+          Save & exit
         </button>
       </div>
 

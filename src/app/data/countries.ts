@@ -1,8 +1,60 @@
-export const LOCODE_MAP: Record<string, string> = {
-    "United Kingdom": "GB",
-    "United States": "US",
-    "Germany": "DE",
-    "France": "FR",
-    "Spain": "ES",
-    // Add more as needed
-  };
+export interface Country {
+  name: string;
+  locode: string;
+  sourceCode: string;
+  sourceName: string;
+  feraSourceCode: string;
+  feraSourceName: string;
+}
+
+export const COUNTRIES: Country[] = [
+  { name: "Australia", locode: "AU", sourceCode: "DISER", sourceName: "Australian Government", feraSourceCode: "DISER", feraSourceName: "Australian Government" },
+  { name: "Austria", locode: "AT", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Belgium", locode: "BE", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Brazil", locode: "BR", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Bulgaria", locode: "BG", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Canada", locode: "CA", sourceCode: "Government of Canada", sourceName: "Canadian Government", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "China", locode: "CN", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Croatia", locode: "HR", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Cyprus", locode: "CY", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Czech", locode: "CZ", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Denmark", locode: "DK", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Estonia", locode: "EE", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Finland", locode: "FI", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "France", locode: "FR", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Germany", locode: "DE", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Greece", locode: "GR", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Hong Kong", locode: "HK", sourceCode: "CLP Group", sourceName: "CLP Group", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Hungary", locode: "HU", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Iceland", locode: "IS", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "India", locode: "IN", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Indonesia", locode: "ID", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Ireland", locode: "IE", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Italy", locode: "IT", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Japan", locode: "JP", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Latvia", locode: "LV", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Lithuania", locode: "LT", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Luxembourg", locode: "LU", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Malta", locode: "MT", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Mexico", locode: "MX", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Netherlands", locode: "NL", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "New Zealand", locode: "NZ", sourceCode: "MfE", sourceName: "New Zealand Government", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Norway", locode: "NO", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Poland", locode: "PL", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Portugal", locode: "PT", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Romania", locode: "RO", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Russia", locode: "RU", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Saudi Arabia", locode: "SA", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Singapore", locode: "SG", sourceCode: "EMA", sourceName: "Singapore EMA", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Slovakia", locode: "SK", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Slovenia", locode: "SI", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "South Africa", locode: "ZA", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "South Korea", locode: "KR", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Spain", locode: "ES", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Sweden", locode: "SE", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Switzerland", locode: "CH", sourceCode: "AIB", sourceName: "EU AIB", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Thailand", locode: "TH", sourceCode: "EPPO", sourceName: "Thailand EPPO", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "Turkiye", locode: "TR", sourceCode: "CT", sourceName: "Climate Transparency", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "United Kingdom", locode: "GB", sourceCode: "BEIS", sourceName: "UK Government", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+  { name: "United States", locode: "US", sourceCode: "EPA", sourceName: "US EPA", feraSourceCode: "BEIS", feraSourceName: "UK Government" },
+];

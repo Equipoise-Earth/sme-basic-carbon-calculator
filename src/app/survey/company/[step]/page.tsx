@@ -18,6 +18,7 @@ export default function CompanySurvey() {
     timePeriodFrom: "",
     timePeriodTo: "",
     employees: "",
+    workFromHomePercentage: "",
     revenue: "",
     facilities: "",
     vehicles: "",
@@ -71,16 +72,16 @@ export default function CompanySurvey() {
 
   const isNextDisabled = () => {
     if (step === 1 && (!responses.timePeriodFrom || !responses.timePeriodTo)) return true;
-    if (step === 2 && !responses.employees) return true;
-    if (step === 3 && !responses.revenue) return true;
-    if (step === 4 && !responses.facilities) return true;
-    if (step === 5 && !responses.vehicles) return true;
-    if (step === 6 && !responses.machinery) return true;
-    if (step === 7 && !responses.electricity) return true;
-    if (step === 8 && !responses.businessTravel) return true;
-    if (step === 9 && !responses.otherExpenses) return true;
+    if (step === 2 && (!responses.employees || parseInt(responses.employees) <= 0)) return true;
+    if (step === 3 && (!responses.revenue || parseFloat(responses.revenue) <= 0)) return true;
+    if (step === 4 && !responses.facilities.trim()) return true;
+    if (step === 5 && !responses.vehicles.trim()) return true;
+    if (step === 6 && !responses.machinery.trim()) return true;
+    if (step === 7 && (!responses.electricity || parseFloat(responses.electricity) <= 0)) return true;
+    if (step === 8 && (!responses.businessTravel || parseFloat(responses.businessTravel) <= 0)) return true;
+    if (step === 9 && !responses.otherExpenses.trim()) return true;
     return false;
-  };
+  };  
 
   const handleNext = () => {
     if (step < totalSteps) {
@@ -117,12 +118,61 @@ const setLastCalendarYear = () => {
   });
 };
 
+const pageContent = {
+  1: {
+    title: "Reporting Period",
+    image: "/illustrations/Analytics-amico.svg",
+    tip: "This is important to make sure you are reporting consistently. This is flexible, but typically reporting periods are 1 year and align with either the calendar or financial years."
+  },
+  2: {
+    title: "Employee Details",
+    image: "/illustrations/Working-remotely-cuate.svg",
+    tip: "Total headcount at the end of the year helps us understand the size of the business and estimate homeworking emissions. Note that this calculator is designed for businesses of less than 50 employees."
+  },
+  3: {
+    title: "Revenue Insights",
+    image: "/illustrations/Analytics-amico.svg",
+    tip: "Links emissions with business performance."
+  },
+  4: {
+    title: "Facility Overview",
+    image: "/illustrations/Analytics-amico.svg",
+    tip: "Captures energy use across your locations."
+  },
+  5: {
+    title: "Company Vehicles",
+    image: "/illustrations/Analytics-amico.svg",
+    tip: "Tracks emissions from company-owned transport."
+  },
+  6: {
+    title: "Machinery Use",
+    image: "/illustrations/Analytics-amico.svg",
+    tip: "Assesses energy consumption by machinery."
+  },
+  7: {
+    title: "Electricity Consumption",
+    image: "/illustrations/Analytics-amico.svg",
+    tip: "Key for calculating indirect emissions."
+  },
+  8: {
+    title: "Business Travel",
+    image: "/illustrations/Analytics-amico.svg",
+    tip: "Helps quantify travel-related emissions."
+  },
+  9: {
+    title: "Other Expenses",
+    image: "/illustrations/Analytics-amico.svg",
+    tip: "Captures emissions not covered in prior steps."
+  }
+};
+
+
   return (
     <div className="flex flex-col items-center min-h-screen bg-lightGrey px-4">
       {/* Top Navigation */}
       <div className="w-full max-w-4xl flex justify-between items-center pt-6">
         <button onClick={() => router.push("/")} className="text-darkGrey text-sm hover:underline">
-          Cancel
+          Save & exit
         </button>
         <p className="text-darkGrey text-sm font-sofia">
           Step {step} / {totalSteps}
@@ -142,18 +192,38 @@ const setLastCalendarYear = () => {
       {/* Two-Column Layout */}
       <div className="bg-white rounded-lg shadow-md mt-4 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2">
         {/* Left Column */}
-        <div className="bg-secondary p-10 text-white md:rounded-l-lg relative flex justify-between items-start">
-          {/* SME Logo (Top Left) */}
+        <div className="bg-secondary p-10 text-white md:rounded-l-lg relative flex flex-col justify-between items-center">
+          
+          {/* SME Logo (Fixed at Top Left) */}
           <Image 
             src="/logos/SMECH_logo_white.svg" 
             alt="SME Climate Hub Logo" 
-            width={120} 
+            width={100} 
             height={40} 
             className="absolute top-6 left-6"
           />
 
-          {/* Company Data Heading (Top Right) */}
-          <h2 className="text-2xl font-bold absolute top-10 right-8">Company Data</h2>
+          {/* Dynamic Image */}
+          <div className="flex justify-center items-center flex-grow">
+            <Image 
+              src={pageContent[step]?.image || "/illustrations/Analytics-amico.svg"}
+              alt={pageContent[step]?.title || "Company Data"} 
+              width={300} 
+              height={300} 
+              className="h-auto" 
+            />
+          </div>
+
+          {/* Dynamic Title */}
+          <h2 className="text-2xl font-bold text-center mt-4">
+            {pageContent[step]?.title || "Company Data"}
+          </h2>
+
+          {/* Dynamic Tip */}
+          <div className="mt-4 text-sm text-gray-200 text-center">
+            <p><strong>Why are we asking this?</strong></p>
+            <p>{pageContent[step]?.tip || "This helps us calculate your emissions accurately."}</p>
+          </div>
         </div>
 
 
@@ -204,16 +274,61 @@ const setLastCalendarYear = () => {
           )}
 
           {step === 2 && (
-            <>
-              <h1 className="text-2xl font-bold">Employees</h1>
-              <input
-                type="number"
-                value={responses.employees || ""}
-                onChange={(e) => saveResponse({ employees: e.target.value })}
-                className="border p-2 rounded w-full mt-4"
-              />
-            </>
+            <div className="flex flex-col justify-between h-full">
+              {/* Dynamic Date Range */}
+              <p className="text-sm text-gray-600 mb-4">
+                From {responses.startDate || "1 January 2023"} to {responses.endDate || "31 December 2023"}
+              </p>
+              
+              {/* Employee Count Section */}
+              <div className="space-y-4">
+                <h1 className="text-2xl font-bold">How many people worked at your company at the end of this time period?</h1>
+                <p className="text-sm text-gray-500">Tip: Your HR or management team would know this.</p>
+
+                <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                  <input
+                    type="number"
+                    min="1"
+                    value={responses.employees || ""}
+                    onChange={(e) => saveResponse({ employees: e.target.value })}
+                    className="flex-grow bg-transparent outline-none"
+                    placeholder="0"
+                  />
+                  <span className="ml-2 text-gray-600">employees</span>
+                </div>
+              </div>
+
+              {/* Work From Home Section */}
+              <div className="space-y-4 mt-8">  {/* Added more spacing */}
+                <h2 className="text-xl font-semibold">What proportion (%) of the time did these employees work from home, on average?</h2>
+                <p className="text-sm text-gray-500">Tip: Estimate if exact data isn’t available.</p>
+
+                <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={responses.workFromHomePercentage || ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "" || (parseInt(value) >= 0 && parseInt(value) <= 100)) {
+                        saveResponse({ workFromHomePercentage: value });
+                      }
+                    }}
+                    onBlur={() => {
+                      if (responses.workFromHomePercentage === "") {
+                        saveResponse({ workFromHomePercentage: "0" });
+                      }
+                    }}
+                    className="flex-grow bg-transparent outline-none"
+                    placeholder="0"
+                  />
+                  <span className="ml-2 text-gray-600">%</span>
+                </div>
+              </div>
+            </div>
           )}
+
 
           {step === 3 && (
             <>
@@ -301,14 +416,17 @@ const setLastCalendarYear = () => {
         </div>
       </div>
 
-      {/* Survey Navigation */}
       <SurveyNavigation
           step={step}
-          totalSteps={totalSteps}
+          totalSteps={9}  
           handleNext={handleNext}
           handleBack={handleBack}
-          isNextDisabled={isNextDisabled()}
+          isCompanyDataSection={true}  
+          nextSectionPath="/report"
+          responses={responses} 
+          isNextDisabled={isNextDisabled()} 
         />
+
     </div>
   );
 }
