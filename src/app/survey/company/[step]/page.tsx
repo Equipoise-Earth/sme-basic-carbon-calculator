@@ -62,10 +62,20 @@ export default function CompanySurvey() {
   }, []);
 
   const saveResponse = async (newData: Partial<typeof responses>) => {
-    const updatedResponses = { ...responses, ...newData };
+    let updatedResponses = { ...responses, ...newData };
+  
+    // Convert facilities to m² before saving
+    if (newData.facilitiesRaw !== undefined) {
+      if (updatedResponses.facilitiesUnit === "ft²") {
+        updatedResponses.facilities = (parseFloat(newData.facilitiesRaw) / 10.764).toFixed(2);
+      } else {
+        updatedResponses.facilities = newData.facilitiesRaw;
+      }
+    }
+  
     setResponses(updatedResponses);
     localStorage.setItem(`companyResponses_${userId}`, JSON.stringify(updatedResponses));
-
+  
     try {
       await setDoc(doc(db, "users", userId), updatedResponses, { merge: true });
     } catch (error) {
@@ -81,20 +91,19 @@ export default function CompanySurvey() {
   
     return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(date);
   };
-  
 
   const isNextDisabled = () => {
     if (step === 1 && (!responses.timePeriodFrom || !responses.timePeriodTo)) return true;
     if (step === 2 && (!responses.employees || parseInt(responses.employees) <= 0)) return true;
     if (step === 3 && (!responses.revenue || parseFloat(responses.revenue) <= 0)) return true;
-    if (step === 4 && !responses.facilities.trim()) return true;
+    if (step === 4 && !responses.noFacilities && (!responses.facilitiesRaw || parseFloat(responses.facilitiesRaw) <= 0)) return true;
     if (step === 5 && !responses.vehicles.trim()) return true;
     if (step === 6 && !responses.machinery.trim()) return true;
     if (step === 7 && (!responses.electricity || parseFloat(responses.electricity) <= 0)) return true;
     if (step === 8 && (!responses.businessTravel || parseFloat(responses.businessTravel) <= 0)) return true;
     if (step === 9 && !responses.otherExpenses.trim()) return true;
     return false;
-  };  
+  };
 
   const handleNext = () => {
     if (step < totalSteps) {
@@ -372,12 +381,72 @@ const pageContent = {
                 From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
               <h1 className="text-2xl font-bold">Facilities</h1>
-              <input
-                type="text"
-                value={responses.facilities || ""}
-                onChange={(e) => saveResponse({ facilities: e.target.value })}
-                className="border p-2 rounded w-full mt-4"
-              />
+
+              {/* Facility Area Input & Unit Selector */}
+              <div className="mt-4">
+                <label className="block text-gray-700">Total area</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="number"
+                    min="0"
+                    value={responses.facilitiesRaw || ""}
+                    onChange={(e) => {
+                      saveResponse({
+                        facilitiesRaw: e.target.value, // Allow free typing
+                      });
+                    }}
+                    onBlur={() => {
+                      if (responses.facilitiesRaw && responses.facilitiesUnit === "ft²") {
+                        saveResponse({
+                          facilities: (parseFloat(responses.facilitiesRaw) * 0.092903).toFixed(2), // Convert to m²
+                        });
+                      } else {
+                        saveResponse({
+                          facilities: responses.facilitiesRaw, // Keep the input as is for m²
+                        });
+                      }
+                    }}
+                    disabled={responses.noFacilities}
+                    className={`border p-2 rounded w-full mt-2 bg-gray-100 ${
+                      responses.noFacilities ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
+                    }`}
+                    placeholder="Enter area"
+                  />
+
+                  {/* Unit Dropdown */}
+                  <select
+                    value={responses.facilitiesUnit || "m²"}
+                    onChange={(e) => saveResponse({ facilitiesUnit: e.target.value })}
+                    disabled={responses.noFacilities}
+                    className={`border p-2 rounded mt-2 bg-gray-100 ${
+                      responses.noFacilities ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    <option value="m²">m²</option>
+                    <option value="ft²">ft²</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* "No Facilities" Checkbox - Below the Inputs */}
+              <div className="flex items-center space-x-2 mt-4">
+                <input
+                  type="checkbox"
+                  id="noFacilities"
+                  checked={responses.noFacilities || false}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    saveResponse({
+                      noFacilities: checked,
+                      facilitiesRaw: checked ? "" : responses.facilitiesRaw,
+                      facilitiesUnit: checked ? "m²" : responses.facilitiesUnit,
+                      facilities: checked ? "" : responses.facilities, // Ensure backend storage consistency
+                    });
+                  }}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="noFacilities">No owned or leased facilities</label>
+              </div>
             </div>
           )}
 
@@ -386,7 +455,7 @@ const pageContent = {
               <p className="text-sm text-gray-600 mb-4">
                 From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
-              <h1 className="text-2xl font-bold">Vehicles</h1>
+              <h1 className="text-2xl font-bold"></h1>
               <input
                 type="text"
                 value={responses.vehicles || ""}
