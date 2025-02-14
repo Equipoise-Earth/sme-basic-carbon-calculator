@@ -54,7 +54,7 @@ export default function SurveyNavigation({
           onClick={handleBackward}
           className="px-6 py-3 rounded-lg text-lg font-bold transition-all duration-300 ease-in-out bg-secondary text-white border-2 border-white hover:bg-transparent hover:border-2 hover:border-primary hover:text-primary"
         >
-          ← GO BACK
+          ← BACK
         </button>
       )}
 
@@ -91,7 +91,7 @@ export default function SurveyNavigation({
           }`}
           disabled={isNextDisabled}  // ✅ Simplified disabling logic
         >
-          {isCompanyDataSection && step === totalSteps ? "CALCULATE!" : "CONTINUE →"}
+          {isCompanyDataSection && step === totalSteps ? "CALCULATE!" : "NEXT →"}
         </button>
       )}
     </div>

@@ -73,6 +73,16 @@ export default function CompanySurvey() {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return ""; // Return empty string if no date
+  
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // Return original string if invalid
+  
+    return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(date);
+  };
+  
+
   const isNextDisabled = () => {
     if (step === 1 && (!responses.timePeriodFrom || !responses.timePeriodTo)) return true;
     if (step === 2 && (!responses.employees || parseInt(responses.employees) <= 0)) return true;
@@ -280,7 +290,7 @@ const pageContent = {
             <div className="space-y-4 mt-8">
               {/* Dynamic Date Range */}
               <p className="text-sm text-gray-600 mb-4">
-                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
               
               {/* Employee Count Section */}
@@ -335,7 +345,7 @@ const pageContent = {
           {step === 3 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
-                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
               
               <h1 className="text-2xl font-bold">What was your company’s revenue in this period?</h1>
@@ -359,7 +369,7 @@ const pageContent = {
           {step === 4 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
-                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
               <h1 className="text-2xl font-bold">Facilities</h1>
               <input
@@ -374,7 +384,7 @@ const pageContent = {
           {step === 5 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
-                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
               <h1 className="text-2xl font-bold">Vehicles</h1>
               <input
@@ -389,7 +399,7 @@ const pageContent = {
           {step === 6 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
-                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
               <h1 className="text-2xl font-bold">Machinery</h1>
               <input
@@ -404,7 +414,7 @@ const pageContent = {
           {step === 7 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
-                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
               <h1 className="text-2xl font-bold">Electricity</h1>
               <input
@@ -419,7 +429,7 @@ const pageContent = {
           {step === 8 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
-                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
               <h1 className="text-2xl font-bold">Business Travel</h1>
               <input
@@ -434,7 +444,7 @@ const pageContent = {
           {step === 9 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
-              From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+              From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
               <h1 className="text-2xl font-bold">Other Expenses</h1>
               <input

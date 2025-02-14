@@ -67,3 +67,13 @@ body {
   font-family: "Sofia Pro", sans-serif;
   background-color: #F0F0F0; /* Light Grey */
 }
+
+@layer components {
+  select {
+    @apply w-full border p-2 pr-10 rounded bg-gray-100 appearance-none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='gray'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+  }
+}
