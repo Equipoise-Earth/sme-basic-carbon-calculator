@@ -6,6 +6,7 @@ import Image from "next/image";
 import SurveyNavigation from "@/components/SurveyNavigation";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { COUNTRIES } from "@/app/data/countries";
 
 export default function CompanySurvey() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function CompanySurvey() {
     electricity: "",
     businessTravel: "",
     otherExpenses: "",
+    currencyCode: "",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +56,7 @@ export default function CompanySurvey() {
         setIsLoading(false);
       }
     };
+    
 
     fetchResponses();
   }, []);
@@ -121,18 +124,18 @@ const setLastCalendarYear = () => {
 const pageContent = {
   1: {
     title: "Reporting Period",
-    image: "/illustrations/Analytics-amico.svg",
+    image: "/illustrations/Calendar-amico.svg",
     tip: "This is important to make sure you are reporting consistently. This is flexible, but typically reporting periods are 1 year and align with either the calendar or financial years."
   },
   2: {
     title: "Employee Details",
-    image: "/illustrations/Working-remotely-cuate.svg",
+    image: "/illustrations/Team goals-amico.svg",
     tip: "Total headcount at the end of the year helps us understand the size of the business and estimate homeworking emissions. Note that this calculator is designed for businesses of less than 50 employees."
   },
   3: {
-    title: "Revenue Insights",
+    title: "Company Revenue",
     image: "/illustrations/Analytics-amico.svg",
-    tip: "Links emissions with business performance."
+    tip: "Understanding company revenue allows us to provide a basis of comparison to other companies in you sector. This data, along with all company data provided, remains entirely private."
   },
   4: {
     title: "Facility Overview",
@@ -141,7 +144,7 @@ const pageContent = {
   },
   5: {
     title: "Company Vehicles",
-    image: "/illustrations/Analytics-amico.svg",
+    image: "/illustrations/Fuel station-amico.svg",
     tip: "Tracks emissions from company-owned transport."
   },
   6: {
@@ -192,7 +195,7 @@ const pageContent = {
       {/* Two-Column Layout */}
       <div className="bg-white rounded-lg shadow-md mt-4 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2">
         {/* Left Column */}
-        <div className="bg-secondary p-10 text-white md:rounded-l-lg relative flex flex-col justify-between items-center">
+        <div className="bg-primary p-10 text-white md:rounded-l-lg relative flex flex-col justify-between items-center">
           
           {/* SME Logo (Fixed at Top Left) */}
           <Image 
@@ -274,10 +277,10 @@ const pageContent = {
           )}
 
           {step === 2 && (
-            <div className="flex flex-col justify-between h-full">
+            <div className="space-y-4 mt-8">
               {/* Dynamic Date Range */}
               <p className="text-sm text-gray-600 mb-4">
-                From {responses.startDate || "1 January 2023"} to {responses.endDate || "31 December 2023"}
+                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
               </p>
               
               {/* Employee Count Section */}
@@ -299,7 +302,7 @@ const pageContent = {
               </div>
 
               {/* Work From Home Section */}
-              <div className="space-y-4 mt-8">  {/* Added more spacing */}
+              <div className="space-y-4 mt-8"> 
                 <h2 className="text-xl font-semibold">What proportion (%) of the time did these employees work from home, on average?</h2>
                 <p className="text-sm text-gray-500">Tip: Estimate if exact data isn’t available.</p>
 
@@ -329,21 +332,35 @@ const pageContent = {
             </div>
           )}
 
-
           {step === 3 && (
-            <>
-              <h1 className="text-2xl font-bold">Revenue</h1>
-              <input
-                type="number"
-                value={responses.revenue || ""}
-                onChange={(e) => saveResponse({ revenue: e.target.value })}
-                className="border p-2 rounded w-full mt-4"
-              />
-            </>
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+              </p>
+              
+              <h1 className="text-2xl font-bold">What was your company’s revenue in this period?</h1>
+              <p className="text-sm text-gray-500">Tip: Your company's accounts team would know this.</p>
+              
+              <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                <input
+                  type="number"
+                  value={responses.revenue || ""}
+                  onChange={(e) => saveResponse({ revenue: e.target.value })}
+                  className="flex-grow bg-transparent outline-none"
+                  placeholder="0"
+                />
+                <span className="ml-2 text-gray-600">
+                  {responses.currencyCode || ""}
+                </span>
+              </div>
+            </div>
           )}
 
           {step === 4 && (
-            <>
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+              </p>
               <h1 className="text-2xl font-bold">Facilities</h1>
               <input
                 type="text"
@@ -351,11 +368,14 @@ const pageContent = {
                 onChange={(e) => saveResponse({ facilities: e.target.value })}
                 className="border p-2 rounded w-full mt-4"
               />
-            </>
+            </div>
           )}
 
           {step === 5 && (
-            <>
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+              </p>
               <h1 className="text-2xl font-bold">Vehicles</h1>
               <input
                 type="text"
@@ -363,11 +383,14 @@ const pageContent = {
                 onChange={(e) => saveResponse({ vehicles: e.target.value })}
                 className="border p-2 rounded w-full mt-4"
               />
-            </>
+            </div>
           )}
 
           {step === 6 && (
-            <>
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+              </p>
               <h1 className="text-2xl font-bold">Machinery</h1>
               <input
                 type="text"
@@ -375,11 +398,14 @@ const pageContent = {
                 onChange={(e) => saveResponse({ machinery: e.target.value })}
                 className="border p-2 rounded w-full mt-4"
               />
-            </>
+            </div>
           )}
 
           {step === 7 && (
-            <>
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+              </p>
               <h1 className="text-2xl font-bold">Electricity</h1>
               <input
                 type="text"
@@ -387,11 +413,14 @@ const pageContent = {
                 onChange={(e) => saveResponse({ electricity: e.target.value })}
                 className="border p-2 rounded w-full mt-4"
               />
-            </>
+            </div>
           )}
 
           {step === 8 && (
-            <>
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+              </p>
               <h1 className="text-2xl font-bold">Business Travel</h1>
               <input
                 type="text"
@@ -399,11 +428,14 @@ const pageContent = {
                 onChange={(e) => saveResponse({ businessTravel: e.target.value })}
                 className="border p-2 rounded w-full mt-4"
               />
-            </>
+            </div>
           )}
 
           {step === 9 && (
-            <>
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+              From {responses.timePeriodFrom || ""} to {responses.timePeriodTo || ""}
+              </p>
               <h1 className="text-2xl font-bold">Other Expenses</h1>
               <input
                 type="text"
@@ -411,7 +443,7 @@ const pageContent = {
                 onChange={(e) => saveResponse({ otherExpenses: e.target.value })}
                 className="border p-2 rounded w-full mt-4"
               />
-            </>
+            </div>
           )}
         </div>
       </div>

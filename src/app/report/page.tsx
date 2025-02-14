@@ -29,6 +29,8 @@ export default function Report() {
 
           const regionCode = countryDetails ? countryDetails.locode : "GB";
           const sourceCode = countryDetails ? countryDetails.sourceCode : "BEIS";
+          const currencyCode = countryDetails ? countryDetails.currencyCode : "No code";
+
 
           const batchRequests = [
             {
@@ -104,6 +106,7 @@ export default function Report() {
               kgCO2e: result.co2e || 0,
               dataSource: emissionFactor.source || "Unknown", // ✅ Dynamic source from API
               yearUsed: emissionFactor.year || "N/A",
+              currencyCode: currencyCode,
               error: result?.error || null, // ✅ Store error if exists
             };
           });
@@ -145,6 +148,7 @@ export default function Report() {
               {item.error && (
                 <p className="text-red-500 mt-2">⚠️ Error: {item.error.message}</p>
               )}
+
             </div>
           ))}
         </div>

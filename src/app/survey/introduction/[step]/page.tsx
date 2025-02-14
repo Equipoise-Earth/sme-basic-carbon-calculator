@@ -20,6 +20,7 @@ export default function IntroductionSurvey() {
   const [responses, setResponses] = useState({
     companyName: "",
     companyLocation: "",
+    currencyCode: "",
     companySector: "",
     termsAccepted: false,
   });
@@ -53,10 +54,25 @@ useEffect(() => {
 const saveResponse = async (newData: Partial<typeof responses>) => {
   const updatedResponses = { ...responses, ...newData };
   setResponses(updatedResponses);
-  localStorage.setItem(`userResponses_${userId}`, JSON.stringify(updatedResponses)); // ✅ Save locally first
+  localStorage.setItem(`userResponses_${userId}`, JSON.stringify(updatedResponses));
+
+  // Also update companyResponses with currencyCode (if it exists)
+  if (newData.currencyCode) {
+    const storedCompanyData = localStorage.getItem(`companyResponses_${userId}`);
+    const companyData = storedCompanyData ? JSON.parse(storedCompanyData) : {};
+    
+    const updatedCompanyData = { ...companyData, currencyCode: newData.currencyCode };
+    localStorage.setItem(`companyResponses_${userId}`, JSON.stringify(updatedCompanyData));
+
+    try {
+      await setDoc(doc(db, "users", userId), updatedCompanyData, { merge: true });
+    } catch (error) {
+      console.error("Error saving currencyCode to Firestore:", error);
+    }
+  }
 
   try {
-    await setDoc(doc(db, "users", userId), updatedResponses, { merge: true }); // ✅ Firestore only when needed
+    await setDoc(doc(db, "users", userId), updatedResponses, { merge: true });
   } catch (error) {
     console.error("Error saving to Firestore:", error);
   }
@@ -169,20 +185,29 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
           </>
         )}
 
+
+        {/* STEP 4: COMPANY LOCATION */}
         {step === 4 && (
           <>
             <h1 className="text-2xl font-bold font-sofia">Where is your company located?</h1>
             <select
               value={responses.companyLocation}
-                  onChange={(e) => saveResponse({ companyLocation: e.target.value })}
-                  className="border p-2 rounded w-full mt-4 text-center">
-                  <option value="">Select a country</option>
-                  {COUNTRIES.map((country) => (
-                    <option key={country.locode} value={country.locode}>
+              onChange={(e) => {
+                const selectedCountry = COUNTRIES.find(country => country.locode === e.target.value);
+                saveResponse({ 
+                  companyLocation: e.target.value,
+                  currencyCode: selectedCountry?.currencyCode || "" 
+                });
+              }}
+              className="border p-2 rounded w-full mt-4 text-center">
+              <option value="">Select a country</option>
+              {COUNTRIES.map((country) => (
+                <option key={country.locode} value={country.locode}>
                   {country.name}
-            </option>
-          ))}
-        </select>
+                </option>
+              ))}
+            </select>
+
           </>
         )}
 
@@ -196,23 +221,49 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
               className="border p-2 rounded w-full mt-4 text-center"
             >
               <option value="">Select a sector</option>
-              <option value="Technology">Technology</option>
-              <option value="Finance">Finance</option>
-              <option value="Manufacturing">Manufacturing</option>
+              <option value="Business activities">Business activities – Consultancy, legal, accounting, etc.</option>
+              <option value="Construction and civil engineering">Construction and civil engineering</option>
+              <option value="Creative arts and entertainment activities">Creative arts and entertainment activities</option>
+              <option value="Education and research">Education and research</option>
+              <option value="Energy and utilities">Energy and utilities</option>
+              <option value="Finance – General">Finance – General</option>
+              <option value="Finance – Insurance and pension">Finance – Insurance and pension</option>
+              <option value="Health care and services">Health care and services</option>
+              <option value="Information technology">Information technology</option>
+              <option value="Land use – Agriculture, forestry, and fishing">Land use – Agriculture, forestry, and fishing</option>
+              <option value="Manufacturing – Chemicals">Manufacturing – Chemicals</option>
+              <option value="Manufacturing – Consumer goods">Manufacturing – Consumer goods</option>
+              <option value="Manufacturing – Food and beverages">Manufacturing – Food and beverages</option>
+              <option value="Manufacturing – Heavy industries">Manufacturing – Heavy industries</option>
+              <option value="Manufacturing – Other">Manufacturing – Other</option>
+              <option value="Membership organizations">Membership organizations</option>
+              <option value="Non-governmental organization">Non-governmental organization</option>
+              <option value="Other commercial service activities">Other commercial service activities</option>
+              <option value="Pharmaceuticals">Pharmaceuticals</option>
+              <option value="Public administration">Public administration</option>
+              <option value="Publishing activities">Publishing activities</option>
+              <option value="Real estate activities">Real estate activities</option>
+              <option value="Retail and wholesale">Retail and wholesale</option>
+              <option value="Telecommunication">Telecommunication</option>
+              <option value="Tourism and hospitality">Tourism and hospitality</option>
+              <option value="Transport and logistics">Transport and logistics</option>
+              <option value="Warehousing">Warehousing</option>
             </select>
           </>
         )}
+
       </div>
 
       {/* SURVEY NAVIGATION */}
       <SurveyNavigation
         step={step}
-        totalSteps={totalSteps}
+        totalSteps={9}  
         handleNext={handleNext}
         handleBack={handleBack}
-        nextSectionPath="/survey/company/guidance/1"
-        isNextDisabled={isNextDisabled()}
-        isIntroduction={true}
+        isCompanyDataSection={true}  
+        nextSectionPath="/report"
+        responses={responses} 
+        isNextDisabled={isNextDisabled()} 
       />
     </div>
   );
