@@ -458,65 +458,64 @@ const pageContent = {
             </div>
           )}
 
-{step === 5 && (
-  <div className="space-y-4 mt-8">
-    <p className="text-sm text-gray-600 mb-4">
-      From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
-    </p>
-    
-    <h1 className="text-2xl font-bold">
-      How much electricity did your company consume in this period?
-    </h1>
-    <p className="text-sm text-gray-500">
-      Tip: This will be on your electricity bill or recorded by your operations teams. If you shared services 
-      so cannot split this, leave as zero and it can be captured in your expenditure.
-    </p>
+          {step === 5 && (
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+              </p>
+              
+              <h1 className="text-2xl font-bold">
+                How much electricity did your company consume in this period?
+              </h1>
+              <p className="text-sm text-gray-500">
+                Tip: This will be on your electricity bill or recorded by your operations teams. If you shared services 
+                so cannot split this, leave as zero and it can be captured in your expenditure.
+              </p>
 
-    {/* Electricity Input with kWh inside the field */}
-    <div className="flex items-center border p-2 rounded w-full bg-gray-100">
-      <input
-        type="number"
-        min="0"
-        value={responses.electricityRaw || ""}
-        onChange={(e) => {
-          saveResponse({ electricityRaw: e.target.value });
-        }}
-        onBlur={() => {
-          // Convert to kWh if needed (for consistency in backend storage)
-          if (responses.electricityRaw) {
-            saveResponse({ electricity: responses.electricityRaw });
-          }
-        }}
-        disabled={responses.noElectricity}
-        className={`flex-grow bg-transparent outline-none ${
-          responses.noElectricity ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
-        }`}
-        placeholder="0"
-      />
-      <span className="ml-2 text-gray-600">kWh</span>
-    </div>
+              {/* Electricity Input with kWh inside the field */}
+              <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                <input
+                  type="number"
+                  min="0"
+                  value={responses.electricityRaw || ""}
+                  onChange={(e) => {
+                    saveResponse({ electricityRaw: e.target.value });
+                  }}
+                  onBlur={() => {
+                    // Convert to kWh if needed (for consistency in backend storage)
+                    if (responses.electricityRaw) {
+                      saveResponse({ electricity: responses.electricityRaw });
+                    }
+                  }}
+                  disabled={responses.noElectricity}
+                  className={`flex-grow bg-transparent outline-none ${
+                    responses.noElectricity ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
+                  }`}
+                  placeholder="0"
+                />
+                <span className="ml-2 text-gray-600">kWh</span>
+              </div>
 
-    {/* "No Electricity Usage" Checkbox - Below the Input */}
-    <div className="flex items-center space-x-2 mt-4">
-      <input
-        type="checkbox"
-        id="noElectricity"
-        checked={responses.noElectricity || false}
-        onChange={(e) => {
-          const checked = e.target.checked;
-          saveResponse({
-            noElectricity: checked,
-            electricityRaw: checked ? "" : responses.electricityRaw,
-            electricity: checked ? "" : responses.electricity, // Ensure backend storage consistency
-          });
-        }}
-        className="w-4 h-4"
-      />
-      <label htmlFor="noElectricity">No owned or leased assets</label>
-    </div>
-  </div>
-)}
-
+              {/* "No Electricity Usage" Checkbox - Below the Input */}
+              <div className="flex items-center space-x-2 mt-4">
+                <input
+                  type="checkbox"
+                  id="noElectricity"
+                  checked={responses.noElectricity || false}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    saveResponse({
+                      noElectricity: checked,
+                      electricityRaw: checked ? "" : responses.electricityRaw,
+                      electricity: checked ? "" : responses.electricity, // Ensure backend storage consistency
+                    });
+                  }}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="noElectricity">No owned or leased assets</label>
+              </div>
+            </div>
+          )}
 
           {step === 6 && (
             <div className="space-y-4 mt-8">
@@ -526,6 +525,21 @@ const pageContent = {
               <h1 className="text-2xl font-bold">Did your company heat buildings in the period?</h1>
               <input
                 type="text"
+                value={responses.heating || ""}
+                onChange={(e) => saveResponse({ heating: e.target.value })}
+                className="border p-2 rounded w-full mt-4"
+              />
+            </div>
+          )}
+
+          {step === 7 && (
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+              </p>
+              <h1 className="text-2xl font-bold">Did your company own or lease vehicles in the period?</h1>
+              <input
+                type="text"
                 value={responses.vehicles || ""}
                 onChange={(e) => saveResponse({ vehicles: e.target.value })}
                 className="border p-2 rounded w-full mt-4"
@@ -533,7 +547,7 @@ const pageContent = {
             </div>
           )}
 
-          {step === 7 && (
+          {step === 8 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
                 From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
@@ -548,7 +562,7 @@ const pageContent = {
             </div>
           )}
 
-          {step === 8 && (
+          {step === 9 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
                 From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
@@ -563,7 +577,7 @@ const pageContent = {
             </div>
           )}
 
-          {step === 9 && (
+          {step === 10 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
               From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
@@ -582,7 +596,7 @@ const pageContent = {
 
       <SurveyNavigation
           step={step}
-          totalSteps={9}  
+          totalSteps={10}  
           handleNext={handleNext}
           handleBack={handleBack}
           isCompanyDataSection={true}  
