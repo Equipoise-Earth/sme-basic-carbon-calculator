@@ -103,12 +103,12 @@ export default function CompanyGuidance() {
         </div>
 
         {/* Right Column (Teal Section) */}
-        <div className="bg-secondary p-10 text-white flex items-center md:rounded-r-lg relative">
+        <div className="bg-primary p-10 text-white flex items-center md:rounded-r-lg relative">
           {/* SME Logo (Top Right) */}
           <Image 
             src="/logos/SMECH_logo_white.svg" 
             alt="SME Climate Hub Logo" 
-            width={120} 
+            width={100} 
             height={40} 
             className="absolute top-4 right-4"
           />

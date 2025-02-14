@@ -27,7 +27,7 @@ export default function IntroductionSurvey() {
   
 // Check localStorage before Firestore
 useEffect(() => {
-    const storedData = localStorage.getItem(`userResponses_${userId}`);
+    const storedData = localStorage.getItem(`companyResponses_${userId}`);
     if (storedData) {
       setResponses(JSON.parse(storedData));
       return;
@@ -40,7 +40,7 @@ useEffect(() => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setResponses(data);
-          localStorage.setItem(`userResponses_${userId}`, JSON.stringify(data));
+          localStorage.setItem(`companyResponses_${userId}`, JSON.stringify(data)); // ✅ Store under companyResponses
         }
       } catch (error) {
         console.error("Error fetching Firestore data:", error);
@@ -54,7 +54,7 @@ useEffect(() => {
 const saveResponse = async (newData: Partial<typeof responses>) => {
   const updatedResponses = { ...responses, ...newData };
   setResponses(updatedResponses);
-  localStorage.setItem(`userResponses_${userId}`, JSON.stringify(updatedResponses));
+  localStorage.setItem(`companyResponses_${userId}`, JSON.stringify(updatedResponses));
 
   // Also update companyResponses with currencyCode (if it exists)
   if (newData.currencyCode) {

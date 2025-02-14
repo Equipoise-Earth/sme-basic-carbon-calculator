@@ -27,9 +27,13 @@ export default function Report() {
             (c) => c.locode === userData.companyLocation
           );
 
-          const regionCode = countryDetails ? countryDetails.locode : "GB";
-          const sourceCode = countryDetails ? countryDetails.sourceCode : "BEIS";
-          const currencyCode = countryDetails ? countryDetails.currencyCode : "No code";
+          if (!countryDetails) {
+            throw new Error(`Country not found for locode: ${userData.companyLocation}`);
+          }
+          
+          const regionCode = countryDetails.locode;
+          const sourceCode = countryDetails.sourceCode;
+          const currencyCode = countryDetails.currencyCode;
 
 
           const batchRequests = [
@@ -57,7 +61,7 @@ export default function Report() {
                 data_version: "^20",
               },
               parameters: {
-                number: (parseInt(userData.employees) || 10) * 8 * 220 * 0.5,
+                number: (parseInt(userData.employees) || 10) * 8 * 220 * ((parseFloat(userData.workFromHomePercentage) || 0) / 100),
               },
             },
           ];
@@ -169,10 +173,10 @@ export default function Report() {
       )}
 
       <button
-        onClick={() => router.push("/")}
+        onClick={() => router.push("/survey/introduction/1")}
         className="mt-4 px-6 py-2 bg-primary text-white rounded-md hover:bg-secondary"
       >
-        Back to Home
+        Back to Start
       </button>
     </div>
   );

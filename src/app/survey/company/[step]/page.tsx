@@ -12,7 +12,7 @@ export default function CompanySurvey() {
   const router = useRouter();
   const params = useParams();
   const step = parseInt(params.step as string) || 1;
-  const totalSteps = 9;
+  const totalSteps = 10;
   const userId = "testUser123"; // Placeholder, replace with auth later
 
   const [responses, setResponses] = useState({
@@ -25,9 +25,11 @@ export default function CompanySurvey() {
     vehicles: "",
     machinery: "",
     electricity: "",
+    heating: "",
     businessTravel: "",
     otherExpenses: "",
     currencyCode: "",
+    companyLocation: "",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -97,13 +99,14 @@ export default function CompanySurvey() {
     if (step === 2 && (!responses.employees || parseInt(responses.employees) <= 0)) return true;
     if (step === 3 && (!responses.revenue || parseFloat(responses.revenue) <= 0)) return true;
     if (step === 4 && !responses.noFacilities && (!responses.facilitiesRaw || parseFloat(responses.facilitiesRaw) <= 0)) return true;
-    if (step === 5 && !responses.vehicles.trim()) return true;
-    if (step === 6 && !responses.machinery.trim()) return true;
-    if (step === 7 && (!responses.electricity || parseFloat(responses.electricity) <= 0)) return true;
-    if (step === 8 && (!responses.businessTravel || parseFloat(responses.businessTravel) <= 0)) return true;
-    if (step === 9 && !responses.otherExpenses.trim()) return true;
+    if (step === 5 && !responses.noElectricity && (!responses.electricityRaw || parseFloat(responses.electricityRaw) <= 0)) return true;
+    if (step === 6 && !responses.noHeating && (!responses.heating || parseFloat(responses.heating) <= 0)) return false;
+    if (step === 7 && !responses.vehicles.trim()) return true;
+    if (step === 8 && !responses.machinery.trim()) return true;
+    if (step === 9 && (!responses.businessTravel || parseFloat(responses.businessTravel) <= 0)) return true;
+    if (step === 10 && !responses.otherExpenses.trim()) return true;
     return false;
-  };
+  };  
 
   const handleNext = () => {
     if (step < totalSteps) {
@@ -158,32 +161,37 @@ const pageContent = {
   },
   4: {
     title: "Facility Overview",
-    image: "/illustrations/Analytics-amico.svg",
-    tip: "Captures energy use across your locations."
+    image: "/illustrations/Building-amico.svg",
+    tip: "The size of your company's facilities, rented or owned, helps us determine rates of energy usage and associated emissions."
   },
   5: {
+    title: "Electricity Consumption",
+    image: "/illustrations/Electrician-amico.svg",
+    tip: "Electricity is a key aspect of business carbon emissions. Your consumption will be multiplied by the most recent carbon intensity of your country of operation."
+  },
+    6: {
+      title: "Heating Consumption",
+      image: "/illustrations/Building-amico.svg",
+      tip: "Heating contributes to carbon emissions. If you use gas, oil, or any other fuel for heating, enter your total energy consumption here.",
+    },  
+  7: {
     title: "Company Vehicles",
     image: "/illustrations/Fuel station-amico.svg",
     tip: "Tracks emissions from company-owned transport."
   },
-  6: {
+  8: {
     title: "Machinery Use",
-    image: "/illustrations/Analytics-amico.svg",
+    image: "/illustrations/Logistics-amico.svg",
     tip: "Assesses energy consumption by machinery."
   },
-  7: {
-    title: "Electricity Consumption",
-    image: "/illustrations/Analytics-amico.svg",
-    tip: "Key for calculating indirect emissions."
-  },
-  8: {
+  9: {
     title: "Business Travel",
-    image: "/illustrations/Analytics-amico.svg",
+    image: "/illustrations/Train-amico.svg",
     tip: "Helps quantify travel-related emissions."
   },
-  9: {
+  10: {
     title: "Other Expenses",
-    image: "/illustrations/Analytics-amico.svg",
+    image: "/illustrations/Checking boxes-amico.svg",
     tip: "Captures emissions not covered in prior steps."
   }
 };
@@ -230,8 +238,8 @@ const pageContent = {
             <Image 
               src={pageContent[step]?.image || "/illustrations/Analytics-amico.svg"}
               alt={pageContent[step]?.title || "Company Data"} 
-              width={300} 
-              height={300} 
+              width={200} 
+              height={200} 
               className="h-auto" 
             />
           </div>
@@ -322,7 +330,7 @@ const pageContent = {
 
               {/* Work From Home Section */}
               <div className="space-y-4 mt-8"> 
-                <h2 className="text-xl font-semibold">What proportion (%) of the time did these employees work from home, on average?</h2>
+                <h1 className="text-2xl font-semibold">What proportion (%) of the time did these employees work from home, on average?</h1>
                 <p className="text-sm text-gray-500">Tip: Estimate if exact data isn’t available.</p>
 
                 <div className="flex items-center border p-2 rounded w-full bg-gray-100">
@@ -380,8 +388,8 @@ const pageContent = {
               <p className="text-sm text-gray-600 mb-4">
                 From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
-              <h1 className="text-2xl font-bold">Facilities</h1>
-
+              <h1 className="text-2xl font-bold">What was the total area of your company's facilities in this period?</h1>
+              <p className="text-sm text-gray-500">Include all office, retail, workshop and warehouse spaces - exclude home offices or shared workspaces.</p>
               {/* Facility Area Input & Unit Selector */}
               <div className="mt-4">
                 <label className="block text-gray-700">Total area</label>
@@ -450,31 +458,76 @@ const pageContent = {
             </div>
           )}
 
-          {step === 5 && (
-            <div className="space-y-4 mt-8">
-              <p className="text-sm text-gray-600 mb-4">
-                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
-              </p>
-              <h1 className="text-2xl font-bold"></h1>
-              <input
-                type="text"
-                value={responses.vehicles || ""}
-                onChange={(e) => saveResponse({ vehicles: e.target.value })}
-                className="border p-2 rounded w-full mt-4"
-              />
-            </div>
-          )}
+{step === 5 && (
+  <div className="space-y-4 mt-8">
+    <p className="text-sm text-gray-600 mb-4">
+      From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+    </p>
+    
+    <h1 className="text-2xl font-bold">
+      How much electricity did your company consume in this period?
+    </h1>
+    <p className="text-sm text-gray-500">
+      Tip: This will be on your electricity bill or recorded by your operations teams. If you shared services 
+      so cannot split this, leave as zero and it can be captured in your expenditure.
+    </p>
+
+    {/* Electricity Input with kWh inside the field */}
+    <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+      <input
+        type="number"
+        min="0"
+        value={responses.electricityRaw || ""}
+        onChange={(e) => {
+          saveResponse({ electricityRaw: e.target.value });
+        }}
+        onBlur={() => {
+          // Convert to kWh if needed (for consistency in backend storage)
+          if (responses.electricityRaw) {
+            saveResponse({ electricity: responses.electricityRaw });
+          }
+        }}
+        disabled={responses.noElectricity}
+        className={`flex-grow bg-transparent outline-none ${
+          responses.noElectricity ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
+        }`}
+        placeholder="0"
+      />
+      <span className="ml-2 text-gray-600">kWh</span>
+    </div>
+
+    {/* "No Electricity Usage" Checkbox - Below the Input */}
+    <div className="flex items-center space-x-2 mt-4">
+      <input
+        type="checkbox"
+        id="noElectricity"
+        checked={responses.noElectricity || false}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          saveResponse({
+            noElectricity: checked,
+            electricityRaw: checked ? "" : responses.electricityRaw,
+            electricity: checked ? "" : responses.electricity, // Ensure backend storage consistency
+          });
+        }}
+        className="w-4 h-4"
+      />
+      <label htmlFor="noElectricity">No owned or leased assets</label>
+    </div>
+  </div>
+)}
+
 
           {step === 6 && (
             <div className="space-y-4 mt-8">
               <p className="text-sm text-gray-600 mb-4">
                 From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
-              <h1 className="text-2xl font-bold">Machinery</h1>
+              <h1 className="text-2xl font-bold">Did your company heat buildings in the period?</h1>
               <input
                 type="text"
-                value={responses.machinery || ""}
-                onChange={(e) => saveResponse({ machinery: e.target.value })}
+                value={responses.vehicles || ""}
+                onChange={(e) => saveResponse({ vehicles: e.target.value })}
                 className="border p-2 rounded w-full mt-4"
               />
             </div>
@@ -485,11 +538,11 @@ const pageContent = {
               <p className="text-sm text-gray-600 mb-4">
                 From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
               </p>
-              <h1 className="text-2xl font-bold">Electricity</h1>
+              <h1 className="text-2xl font-bold">Did your company use fuel for machinery in the period?</h1>
               <input
                 type="text"
-                value={responses.electricity || ""}
-                onChange={(e) => saveResponse({ electricity: e.target.value })}
+                value={responses.machinery || ""}
+                onChange={(e) => saveResponse({ machinery: e.target.value })}
                 className="border p-2 rounded w-full mt-4"
               />
             </div>
