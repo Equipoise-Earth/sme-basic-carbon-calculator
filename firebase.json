@@ -6,8 +6,12 @@
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
-          "source": "**",
-          "function": "nextApp"
+          "source": "/survey/introduction/:step",
+          "destination": "/index.html"
+        },
+        {
+          "source": "/survey/company/:step",
+          "destination": "/index.html"
         }
       ]
     },
