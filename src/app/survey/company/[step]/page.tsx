@@ -143,6 +143,10 @@ const setLastCalendarYear = () => {
   });
 };
 
+const uniqueCurrencies = Array.from(
+  new Set(COUNTRIES.map((country) => country.currencyCode))
+).sort();
+
 const pageContent = {
   1: {
     title: "Reporting Period",
@@ -205,7 +209,7 @@ const pageContent = {
           Save & exit
         </button>
         <p className="text-darkGrey text-sm font-sofia">
-          Step {step} / {totalSteps}
+          Data collection {step} / {totalSteps}
         </p>
       </div>
 
@@ -220,47 +224,49 @@ const pageContent = {
       </div>
 
       {/* Two-Column Layout */}
-      <div className="bg-white rounded-lg shadow-md mt-4 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2">
+      <div className="bg-white rounded-lg shadow-md mt-4 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 md:min-h-[600px]">
         {/* Left Column */}
-        <div className="bg-primary p-10 text-white md:rounded-l-lg relative flex flex-col justify-between items-center">
-          
-          {/* SME Logo (Fixed at Top Left) */}
-          <Image 
-            src="/logos/SMECH_logo_white.svg" 
-            alt="SME Climate Hub Logo" 
-            width={100} 
-            height={40} 
-            className="absolute top-6 left-6"
-          />
+<div className="bg-primary p-10 text-white md:rounded-l-lg relative flex flex-col justify-between items-center">
+  
+  {/* SME Logo (Fixed at Top Left) */}
+  <Image 
+    src="/logos/SMECH_logo_white.svg" 
+    alt="SME Climate Hub Logo" 
+    width={100} 
+    height={40} 
+    className="absolute top-6 left-6"
+  />
 
-          {/* Dynamic Image */}
-          <div className="flex justify-center items-center flex-grow">
-            <Image 
-              src={pageContent[step]?.image || "/illustrations/Analytics-amico.svg"}
-              alt={pageContent[step]?.title || "Company Data"} 
-              width={200} 
-              height={200} 
-              className="h-auto" 
-            />
-          </div>
+  {/* Dynamic Image with Mobile-Specific Top Margin */}
+  <div className="flex justify-center items-center flex-grow mt-14 sm:mt-10 md:mt-0">
+    <Image 
+      src={pageContent[step]?.image || "/illustrations/Analytics-amico.svg"}
+      alt={pageContent[step]?.title || "Company Data"} 
+      width={200} 
+      height={200} 
+      className="h-auto" 
+    />
+  </div>
 
-          {/* Dynamic Title */}
-          <h2 className="text-2xl font-bold text-center mt-4">
-            {pageContent[step]?.title || "Company Data"}
-          </h2>
+  {/* Dynamic Title */}
+  <h2 className="text-2xl font-bold text-center mt-4">
+    {pageContent[step]?.title || "Company Data"}
+  </h2>
 
-          {/* Dynamic Tip */}
-          <div className="mt-4 text-sm text-gray-200 text-center">
-            <p><strong>Why are we asking this?</strong></p>
-            <p>{pageContent[step]?.tip || "This helps us calculate your emissions accurately."}</p>
-          </div>
-        </div>
+  {/* Dynamic Tip */}
+  <div className="mt-4 text-sm text-gray-200 text-center">
+    <p><strong>Why are we asking this?</strong></p>
+    <p>{pageContent[step]?.tip || "This helps us calculate your emissions accurately."}</p>
+  </div>
+</div>
 
 
         {/* Right Column */}
-        <div className="p-10">
+        <div className="p-6 pt-4">
         {step === 1 && (
-            <>
+            <div className="space-y-4 mt-8">
+            {/* Dynamic Date Range */}
+            <p className="text-sm text-gray-600 mb-4">&nbsp;</p>
               <h1 className="text-2xl font-bold">What is the time period you want to calculate emissions for?</h1>
 
               <div className="flex gap-4 mt-4">
@@ -300,7 +306,7 @@ const pageContent = {
                   Last Calendar Year
                 </button>
               </div>
-            </>
+            </div>
           )}
 
           {step === 2 && (
@@ -311,7 +317,7 @@ const pageContent = {
               </p>
               
               {/* Employee Count Section */}
-              <div className="space-y-4">
+              <div className="space-y-4 mb-8">
                 <h1 className="text-2xl font-bold">How many people worked at your company at the end of this time period?</h1>
                 <p className="text-sm text-gray-500">Tip: Your HR or management team would know this.</p>
 
@@ -329,7 +335,7 @@ const pageContent = {
               </div>
 
               {/* Work From Home Section */}
-              <div className="space-y-4 mt-8"> 
+              <div className="space-y-4 pt-8"> 
                 <h1 className="text-2xl font-semibold">What proportion (%) of the time did these employees work from home, on average?</h1>
                 <p className="text-sm text-gray-500">Tip: Estimate if exact data isn’t available.</p>
 
@@ -376,9 +382,19 @@ const pageContent = {
                   className="flex-grow bg-transparent outline-none"
                   placeholder="0"
                 />
-                <span className="ml-2 text-gray-600">
-                  {responses.currencyCode || ""}
-                </span>
+
+                {/* Currency Dropdown */}
+                <select
+                  value={responses.currencyCode || ""}
+                  onChange={(e) => saveResponse({ currencyCode: e.target.value })}
+                  className="ml-2 bg-transparent text-gray-600 outline-none cursor-pointer w-[100px] text-left"
+                >
+                  {uniqueCurrencies.map((currencyCode) => (
+                    <option key={currencyCode} value={currencyCode}>
+                      {currencyCode}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           )}
@@ -391,50 +407,46 @@ const pageContent = {
               <h1 className="text-2xl font-bold">What was the total area of your company's facilities in this period?</h1>
               <p className="text-sm text-gray-500">Include all office, retail, workshop and warehouse spaces - exclude home offices or shared workspaces.</p>
               {/* Facility Area Input & Unit Selector */}
-              <div className="mt-4">
-                <label className="block text-gray-700">Total area</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="number"
-                    min="0"
-                    value={responses.facilitiesRaw || ""}
-                    onChange={(e) => {
-                      saveResponse({
-                        facilitiesRaw: e.target.value, // Allow free typing
-                      });
-                    }}
-                    onBlur={() => {
-                      if (responses.facilitiesRaw && responses.facilitiesUnit === "ft²") {
-                        saveResponse({
-                          facilities: (parseFloat(responses.facilitiesRaw) * 0.092903).toFixed(2), // Convert to m²
-                        });
-                      } else {
-                        saveResponse({
-                          facilities: responses.facilitiesRaw, // Keep the input as is for m²
-                        });
-                      }
-                    }}
-                    disabled={responses.noFacilities}
-                    className={`border p-2 rounded w-full mt-2 bg-gray-100 ${
-                      responses.noFacilities ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
-                    }`}
-                    placeholder="Enter area"
-                  />
+<div className="mt-4">
+  <label className="block text-gray-700">Total area</label>
 
-                  {/* Unit Dropdown */}
-                  <select
-                    value={responses.facilitiesUnit || "m²"}
-                    onChange={(e) => saveResponse({ facilitiesUnit: e.target.value })}
-                    disabled={responses.noFacilities}
-                    className={`border p-2 rounded mt-2 bg-gray-100 ${
-                      responses.noFacilities ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    <option value="m²">m²</option>
-                    <option value="ft²">ft²</option>
-                  </select>
-                </div>
-              </div>
+  <div className="flex items-center border p-2 rounded w-full mt-2 bg-gray-100">
+    <input
+      type="number"
+      min="0"
+      value={responses.facilitiesRaw || ""}
+      onChange={(e) => {
+        saveResponse({ facilitiesRaw: e.target.value });
+      }}
+      onBlur={() => {
+        if (responses.facilitiesRaw && responses.facilitiesUnit === "ft²") {
+          saveResponse({
+            facilities: (parseFloat(responses.facilitiesRaw) * 0.092903).toFixed(2), // Convert to m²
+          });
+        } else {
+          saveResponse({ facilities: responses.facilitiesRaw });
+        }
+      }}
+      disabled={responses.noFacilities}
+      className={`flex-grow bg-transparent outline-none ${
+        responses.noFacilities ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
+      }`}
+      placeholder="Enter area"
+    />
+
+    {/* Embedded Unit Dropdown */}
+    <select
+      value={responses.facilitiesUnit || "m²"}
+      onChange={(e) => saveResponse({ facilitiesUnit: e.target.value })}
+      disabled={responses.noFacilities}
+      className="ml-2 bg-transparent text-gray-600 outline-none cursor-pointer w-[80px] text-right"
+    >
+      <option value="m²">m²</option>
+      <option value="ft²">ft²</option>
+    </select>
+  </div>
+</div>
+
 
               {/* "No Facilities" Checkbox - Below the Inputs */}
               <div className="flex items-center space-x-2 mt-4">

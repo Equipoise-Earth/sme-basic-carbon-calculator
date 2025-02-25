@@ -16,11 +16,23 @@ export default function CompanyGuidance() {
         <button onClick={() => router.push("/")} className="text-darkGrey text-sm">
           Save & exit
         </button>
+        <p className="text-darkGrey text-sm font-sofia">
+          Guidance {step} / {totalGuidanceSteps}
+        </p>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="w-full max-w-4xl mt-2">
+        <div className="h-1 bg-gray-300 rounded-full">
+          <div
+            className="h-1 bg-primary rounded-full"
+            style={{ width: `${(step / totalGuidanceSteps) * 100}%` }}
+          ></div>
+        </div>
       </div>
 
       {/* Two-Column Layout: Left White, Right Teal */}
-      <div className="shadow-md mt-4 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 overflow-hidden rounded-lg">
-        
+      <div className="shadow-md mt-4 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 md:min-h-[600px] overflow-hidden rounded-lg">
         {/* Left Column (White Section - Dynamic Content) */}
         <div className="p-10 bg-white">
           {step === 1 && (
