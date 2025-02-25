@@ -156,7 +156,7 @@ const pageContent = {
   2: {
     title: "Employee Details",
     image: "/illustrations/Team goals-amico.svg",
-    tip: "Total headcount at the end of the year helps us understand the size of the business and estimate homeworking emissions. Note that this calculator is designed for businesses of less than 50 employees."
+    tip: "Total headcount at the end of the year helps us understand the size of the business and estimate homeworking emissions. Note that this calculator is designed for single-site businesses."
   },
   3: {
     title: "Company Revenue",
