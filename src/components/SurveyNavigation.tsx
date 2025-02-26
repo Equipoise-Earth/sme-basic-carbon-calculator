@@ -52,56 +52,66 @@ export default function SurveyNavigation({
 <div className="w-full flex flex-wrap justify-center md:justify-between items-center gap-4">
   
   {/* Back Button (Left-Aligned on Desktop, Centered on Mobile) */}
-  {!(isIntroduction && step === 1) && (
-    <button
-      onClick={handleBackward}
-      className="px-6 py-3 w-[140px] h-[48px] flex items-center justify-center rounded-lg text-lg font-bold leading-normal transition-all duration-300 ease-in-out bg-secondary text-white border-2 border-white hover:bg-transparent hover:border-2 hover:border-primary hover:text-primary"
-    >
-      ← BACK
-    </button>
-  )}
+{!(isIntroduction && step === 1) && (
+  <button
+    onClick={handleBackward}
+    className="px-6 py-3 w-[140px] h-[48px] flex items-center justify-center rounded-lg text-lg font-bold leading-normal transition-all duration-300 ease-in-out 
+    border-2 bg-secondary text-white border-secondary 
+    hover:bg-transparent hover:border-primary hover:text-primary"
+  >
+    ← BACK
+  </button>
+)}
 
-  {/* Next / Get Started / Calculate Button */}
-  {isIntroduction && step === 1 ? (
-    <button
-      onClick={handleNext}
-      className="px-6 py-3 w-[140px] h-[48px] flex items-center justify-center rounded-lg text-lg font-bold leading-normal transition-all duration-300 ease-in-out bg-secondary text-white border-2 border-white hover:bg-transparent hover:border-2 hover:border-primary hover:text-primary"
-    >
-      GET STARTED
-    </button>
-  ) : (
-    <button
-      onClick={handleForward}
-      className={`px-6 py-3 w-[140px] h-[48px] flex items-center justify-center rounded-lg text-lg font-bold leading-normal transition-all duration-300 ease-in-out ${
+{/* Next / Get Started / Calculate Button */}
+{isIntroduction && step === 1 ? (
+  <button
+    onClick={handleNext}
+    className="px-6 py-3 w-[140px] h-[48px] flex items-center justify-center rounded-lg text-lg font-bold leading-normal transition-all duration-300 ease-in-out 
+    border-2 bg-secondary text-white border-secondary
+    hover:bg-transparent hover:border-primary hover:text-primary"
+  >
+    GET STARTED
+  </button>
+) : (
+  <button
+    onClick={handleForward}
+    className={`px-6 py-3 w-[140px] h-[48px] flex items-center justify-center rounded-lg text-lg font-bold leading-normal transition-all duration-300 ease-in-out 
+      border-2 ${
         isNextDisabled
-          ? "bg-gray-400 text-white border-2 border-gray-400 cursor-not-allowed"
-          : "bg-secondary text-white border-2 border-white hover:bg-transparent hover:border-2 hover:border-primary hover:text-primary"
+          ? "bg-gray-400 text-white border-gray-400 cursor-not-allowed"
+          : "bg-secondary text-white border-secondary hover:bg-transparent hover:border-primary hover:text-primary"
       }`}
-      disabled={isNextDisabled}
-    >
-      {isCompanyDataSection && step === totalSteps ? "CALCULATE!" : "NEXT →"}
-    </button>
-  )}
+    disabled={isNextDisabled}
+  >
+    {isCompanyDataSection && step === totalSteps ? "CALCULATE!" : "NEXT →"}
+  </button>
+)}
+
+</div>
+      {/* Powered by Equipoise & copyright */}
+      <div className="w-full flex flex-col items-center mt-4">
+  {/* Powered by Section */}
+  <div className="flex items-baseline gap-2">
+    <span className="text-sm text-darkGrey">Built and powered by</span>
+    <a href="https://equipoise.earth" target="_blank" rel="noopener noreferrer" className="flex">
+    <Image
+  src="/logos/Equipoise_Logo-Vector.png"
+  alt="Equipoise Logo"
+  width={100}
+  height={40}
+  className="h-auto relative top-[4px] left-[-4px]"
+  unoptimized
+/>
+    </a>
+  </div>
+
+  {/* Copyright Message */}
+  <p className="text-xs text-darkGrey mt-2">
+    ©{new Date().getFullYear()} We Mean Business Coalition. All Rights Reserved.
+  </p>
 </div>
 
-  
-      {/* Powered by Equipoise (Always Centered Below Buttons) */}
-      <div className="w-full flex justify-center mt-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-darkGrey">Powered by</span>
-          <a href="https://equipoise.earth" target="_blank" rel="noopener noreferrer">
-            <Image
-              src="/logos/Equipoise_Logo-Vector.png"
-              alt="Equipoise Logo"
-              width={100}
-              height={40}
-              className="h-auto"
-              unoptimized
-            />
-          </a>
-        </div>
-      </div>
-  
     </div>
   );
     
