@@ -93,7 +93,7 @@ export default function SurveyNavigation({
       <div className="w-full flex flex-col items-center mt-4">
   {/* Powered by Section */}
   <div className="flex items-baseline gap-2">
-    <span className="text-sm text-darkGrey">Built and powered by</span>
+    <span className="text-sm text-darkGrey">Powered by</span>
     <a href="https://equipoise.earth" target="_blank" rel="noopener noreferrer" className="flex">
     <Image
   src="/logos/Equipoise_Logo-Vector.png"
