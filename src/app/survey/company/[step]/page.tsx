@@ -12,7 +12,7 @@ export default function CompanySurvey() {
   const router = useRouter();
   const params = useParams();
   const step = parseInt(params.step as string) || 1;
-  const totalSteps = 11;
+  const totalSteps = 12;
   const userId = "testUser123"; // Placeholder, replace with auth later
 
   const [responses, setResponses] = useState({
@@ -94,29 +94,44 @@ export default function CompanySurvey() {
     return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(date);
   };
 
-  const isNextDisabled = () => {
-    if (step === 1 && (!responses.timePeriodFrom || !responses.timePeriodTo)) return true;
-    if (step === 2 && (!responses.employees || parseInt(responses.employees) <= 0)) return true;
-    if (step === 3 && (!responses.revenue || parseFloat(responses.revenue) <= 0)) return true;
-    if (step === 4 && !responses.noFacilities && (!responses.facilitiesRaw || parseFloat(responses.facilitiesRaw) <= 0)) return true;
-    if (step === 5 && !responses.noElectricity && (!responses.electricityRaw || parseFloat(responses.electricityRaw) <= 0)) return true;
-    if (step === 6) {
-      if (responses.heatingMethod === "No heating at site" || responses.heatingMethod === "electricity") return false;
-      return !responses.heatingUsage || parseFloat(responses.heatingUsage) <= 0;
+  const isNextDisabled = () => step === 12 && !Object.keys(pageContent).slice(0, -1).every((key) => isStepComplete(parseInt(key)));
+
+  const isStepComplete = (stepNumber: number) => {
+    switch (stepNumber) {
+      case 1:
+        return responses.timePeriodFrom && responses.timePeriodTo;
+      case 2:
+        return responses.employees && parseInt(responses.employees) > 0;
+      case 3:
+        return responses.revenue && parseFloat(responses.revenue) > 0;
+      case 4:
+        return responses.noFacilities || (responses.facilitiesRaw && parseFloat(responses.facilitiesRaw) > 0);
+      case 5:
+        return responses.noElectricity || (responses.electricityRaw && parseFloat(responses.electricityRaw) > 0);
+      case 6:
+        return responses.heatingMethod === "No heating at site" ||
+               responses.heatingMethod === "electricity" ||
+               (responses.heatingUsage && parseFloat(responses.heatingUsage) > 0);
+      case 7:
+        return responses.vehicles === "No" || responses.petrolUsage || responses.dieselUsage;
+      case 8:
+        return responses.machinery === "No" || responses.machineryPetrolUsage || responses.machineryDieselUsage;
+      case 9:
+        return responses.noBusinessTravel ||
+               responses.trainTravel ||
+               responses.airTravel ||
+               responses.busTravel ||
+               responses.taxiTravel;
+      case 10:
+        return responses.noHotelNights || (responses.hotelNights && parseInt(responses.hotelNights) > 0);
+      case 11:
+        return responses.otherExpenses.trim() !== "";
+      default:
+        return false;
     }
-    if (step === 7) {
-      if (responses.vehicles === "No") return false;
-      return !responses.petrolUsage && !responses.dieselUsage; // At least one must be filled
-    }
-    if (step === 8) {
-      if (responses.machinery === "No") return false;
-      return !responses.machineryPetrolUsage && !responses.machineryDieselUsage; // At least one must be filled
-    }
-    if (step === 9 && (!responses.businessTravel || parseFloat(responses.businessTravel) <= 0)) return true;
-    if (step === 10 && (!responses.hotelNights || parseInt(responses.hotelNights) <= 0)) return true;
-    if (step === 11 && !responses.otherExpenses.trim()) return true;  
-    return false;
-  };  
+  };
+  
+
 
 
   const handleNext = () => {
@@ -190,12 +205,12 @@ const pageContent = {
       tip: "Heating contributes to carbon emissions. If you use gas, oil, or any other fuel for heating, enter your total energy consumption here.",
     },  
   7: {
-    title: "Company Vehicles",
+    title: "Fuel Consumption - Company Vehicles",
     image: "/illustrations/Fuel station-amico.svg",
     tip: "Fuel used in company owned or operated vehicles generate carbon emissions."
   },
   8: {
-    title: "Machinery Use",
+    title: "Fuel Consumption - Machinery",
     image: "/illustrations/Logistics-amico.svg",
     tip: "Fuel used in company owned or operated machinery generates carbon emissions."
   },
@@ -213,6 +228,11 @@ const pageContent = {
     title: "Company Expenses",
     image: "/illustrations/Checking boxes-amico.svg",
     tip: "Captures emissions from purchases of goods and services not recorded in previous steps."
+  },
+  12: {
+    title: "Data Summary",
+    image: "/illustrations/Analytics-amico.svg",
+    tip: "Make sure you have checked each step thoroughly before continuing."
   }
 };
 
@@ -626,171 +646,171 @@ const pageContent = {
             </div>
           )}
 
-{step === 7 && (
-  <div className="space-y-4 mt-8">
-    <p className="text-sm text-gray-600 mb-4">
-      From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
-    </p>
+          {step === 7 && (
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+              </p>
 
-    <h1 className="text-2xl font-bold">Did your company own or lease vehicles in the period?</h1>
-    <p className="text-sm text-gray-500">
-      Tip: This includes cars, vans, trucks, and company-owned fleet.
-    </p>
+              <h1 className="text-2xl font-bold">Did your company own or lease vehicles in the period?</h1>
+              <p className="text-sm text-gray-500">
+                Tip: This includes cars, vans, trucks, and company-owned fleet. Electricity for electric cars should be included in the earlier electricity step. 
+              </p>
 
-    <div className="space-y-2">
-      {["Yes", "No"].map((option) => (
-        <label key={option} className="flex items-center space-x-2 cursor-pointer">
-          <input
-            type="radio"
-            name="vehicles"
-            value={option}
-            checked={responses.vehicles === option}
-            onChange={(e) =>
-              saveResponse({
-                vehicles: e.target.value,
-                petrolUsage: e.target.value === "No" ? "" : responses.petrolUsage || "",
-                dieselUsage: e.target.value === "No" ? "" : responses.dieselUsage || "",
-                petrolUnit: responses.petrolUnit || "litres",
-                dieselUnit: responses.dieselUnit || "litres",
-              })
-            }
-            className="w-5 h-5"
-          />
-          <span>{option}</span>
-        </label>
-      ))}
-    </div>
+              <div className="space-y-2">
+                {["Yes", "No"].map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="vehicles"
+                      value={option}
+                      checked={responses.vehicles === option}
+                      onChange={(e) =>
+                        saveResponse({
+                          vehicles: e.target.value,
+                          petrolUsage: e.target.value === "No" ? "" : responses.petrolUsage || "",
+                          dieselUsage: e.target.value === "No" ? "" : responses.dieselUsage || "",
+                          petrolUnit: responses.petrolUnit || "litres",
+                          dieselUnit: responses.dieselUnit || "litres",
+                        })
+                      }
+                      className="w-5 h-5"
+                    />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
 
-    {responses.vehicles === "Yes" && (
-      <div className="space-y-4 mt-4">
-        <h2 className="text-lg font-semibold">Enter fuel used by company vehicles below</h2>
+              {responses.vehicles === "Yes" && (
+                <div className="space-y-4 mt-4">
+                  <h2 className="text-lg font-semibold">Enter fuel used by company vehicles below</h2>
 
-        {/* Petrol Input */}
-        <label className="block text-gray-700">Petrol Usage</label>
-        <div className="flex items-center border p-2 rounded w-full bg-gray-100">
-          <input
-            type="number"
-            min="0"
-            value={responses.petrolUsage || ""}
-            onChange={(e) => saveResponse({ petrolUsage: e.target.value })}
-            className="flex-grow bg-transparent outline-none"
-          />
-          <select
-            value={responses.petrolUnit || "litres"}
-            onChange={(e) => saveResponse({ petrolUnit: e.target.value })}
-            className="bg-transparent text-gray-600 outline-none cursor-pointer w-24"
-          >
-            <option value="litres">litres</option>
-            <option value="gallons">gallons</option>
-          </select>
-        </div>
+                  {/* Petrol Input */}
+                  <label className="block text-gray-700">Petrol Usage</label>
+                  <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                    <input
+                      type="number"
+                      min="0"
+                      value={responses.petrolUsage || ""}
+                      onChange={(e) => saveResponse({ petrolUsage: e.target.value })}
+                      className="flex-grow bg-transparent outline-none"
+                    />
+                    <select
+                      value={responses.petrolUnit || "litres"}
+                      onChange={(e) => saveResponse({ petrolUnit: e.target.value })}
+                      className="bg-transparent text-gray-600 outline-none cursor-pointer w-24"
+                    >
+                      <option value="litres">litres</option>
+                      <option value="gallons">gallons</option>
+                    </select>
+                  </div>
 
-        {/* Diesel Input */}
-        <label className="block text-gray-700">Diesel Usage</label>
-        <div className="flex items-center border p-2 rounded w-full bg-gray-100">
-          <input
-            type="number"
-            min="0"
-            value={responses.dieselUsage || ""}
-            onChange={(e) => saveResponse({ dieselUsage: e.target.value })}
-            className="flex-grow bg-transparent outline-none"
-          />
-          <select
-            value={responses.dieselUnit || "litres"}
-            onChange={(e) => saveResponse({ dieselUnit: e.target.value })}
-            className="bg-transparent text-gray-600 outline-none cursor-pointer w-24"
-          >
-            <option value="litres">litres</option>
-            <option value="gallons">gallons</option>
-          </select>
-        </div>
-      </div>
-    )}
-  </div>
-)}
+                  {/* Diesel Input */}
+                  <label className="block text-gray-700">Diesel Usage</label>
+                  <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                    <input
+                      type="number"
+                      min="0"
+                      value={responses.dieselUsage || ""}
+                      onChange={(e) => saveResponse({ dieselUsage: e.target.value })}
+                      className="flex-grow bg-transparent outline-none"
+                    />
+                    <select
+                      value={responses.dieselUnit || "litres"}
+                      onChange={(e) => saveResponse({ dieselUnit: e.target.value })}
+                      className="bg-transparent text-gray-600 outline-none cursor-pointer w-24"
+                    >
+                      <option value="litres">litres</option>
+                      <option value="gallons">gallons</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
-{step === 8 && (
-  <div className="space-y-4 mt-8">
-    <p className="text-sm text-gray-600 mb-4">
-      From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
-    </p>
+          {step === 8 && (
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+              </p>
 
-    <h1 className="text-2xl font-bold">Did your company use fuel for owned or leased machinery?</h1>
-    <p className="text-sm text-gray-500">
-      Tip: This includes construction equipment, generators, and manufacturing machines.
-    </p>
+              <h1 className="text-2xl font-bold">Did your company use fuel for owned or leased machinery?</h1>
+              <p className="text-sm text-gray-500">
+                Tip: This includes construction equipment, generators, and manufacturing machines.
+              </p>
 
-    <div className="space-y-2">
-      {["Yes", "No"].map((option) => (
-        <label key={option} className="flex items-center space-x-2 cursor-pointer">
-          <input
-            type="radio"
-            name="machinery"
-            value={option}
-            checked={responses.machinery === option}
-            onChange={(e) =>
-              saveResponse({
-                machinery: e.target.value,
-                machineryPetrolUsage: e.target.value === "No" ? "" : responses.machineryPetrolUsage || "",
-                machineryDieselUsage: e.target.value === "No" ? "" : responses.machineryDieselUsage || "",
-                machineryPetrolUnit: responses.machineryPetrolUnit || "litres",
-                machineryDieselUnit: responses.machineryDieselUnit || "litres",
-              })
-            }
-            className="w-5 h-5"
-          />
-          <span>{option}</span>
-        </label>
-      ))}
-    </div>
+              <div className="space-y-2">
+                {["Yes", "No"].map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="machinery"
+                      value={option}
+                      checked={responses.machinery === option}
+                      onChange={(e) =>
+                        saveResponse({
+                          machinery: e.target.value,
+                          machineryPetrolUsage: e.target.value === "No" ? "" : responses.machineryPetrolUsage || "",
+                          machineryDieselUsage: e.target.value === "No" ? "" : responses.machineryDieselUsage || "",
+                          machineryPetrolUnit: responses.machineryPetrolUnit || "litres",
+                          machineryDieselUnit: responses.machineryDieselUnit || "litres",
+                        })
+                      }
+                      className="w-5 h-5"
+                    />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
 
-    {responses.machinery === "Yes" && (
-      <div className="space-y-4 mt-4">
-        <h2 className="text-lg font-semibold">Enter fuel used by machinery below</h2>
+              {responses.machinery === "Yes" && (
+                <div className="space-y-4 mt-4">
+                  <h2 className="text-lg font-semibold">Enter fuel used by machinery below</h2>
 
-        {/* Petrol Input */}
-        <label className="block text-gray-700">Petrol Usage</label>
-        <div className="flex items-center border p-2 rounded w-full bg-gray-100">
-          <input
-            type="number"
-            min="0"
-            value={responses.machineryPetrolUsage || ""}
-            onChange={(e) => saveResponse({ machineryPetrolUsage: e.target.value })}
-            className="flex-grow bg-transparent outline-none"
-          />
-          <select
-            value={responses.machineryPetrolUnit || "litres"}
-            onChange={(e) => saveResponse({ machineryPetrolUnit: e.target.value })}
-            className="bg-transparent text-gray-600 outline-none cursor-pointer w-24"
-          >
-            <option value="litres">litres</option>
-            <option value="gallons">gallons</option>
-          </select>
-        </div>
+                  {/* Petrol Input */}
+                  <label className="block text-gray-700">Petrol Usage</label>
+                  <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                    <input
+                      type="number"
+                      min="0"
+                      value={responses.machineryPetrolUsage || ""}
+                      onChange={(e) => saveResponse({ machineryPetrolUsage: e.target.value })}
+                      className="flex-grow bg-transparent outline-none"
+                    />
+                    <select
+                      value={responses.machineryPetrolUnit || "litres"}
+                      onChange={(e) => saveResponse({ machineryPetrolUnit: e.target.value })}
+                      className="bg-transparent text-gray-600 outline-none cursor-pointer w-24"
+                    >
+                      <option value="litres">litres</option>
+                      <option value="gallons">gallons</option>
+                    </select>
+                  </div>
 
-        {/* Diesel Input */}
-        <label className="block text-gray-700">Diesel Usage</label>
-        <div className="flex items-center border p-2 rounded w-full bg-gray-100">
-          <input
-            type="number"
-            min="0"
-            value={responses.machineryDieselUsage || ""}
-            onChange={(e) => saveResponse({ machineryDieselUsage: e.target.value })}
-            className="flex-grow bg-transparent outline-none"
-          />
-          <select
-            value={responses.machineryDieselUnit || "litres"}
-            onChange={(e) => saveResponse({ machineryDieselUnit: e.target.value })}
-            className="bg-transparent text-gray-600 outline-none cursor-pointer w-24"
-          >
-            <option value="litres">litres</option>
-            <option value="gallons">gallons</option>
-          </select>
-        </div>
-      </div>
-    )}
-  </div>
-)}
+                  {/* Diesel Input */}
+                  <label className="block text-gray-700">Diesel Usage</label>
+                  <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                    <input
+                      type="number"
+                      min="0"
+                      value={responses.machineryDieselUsage || ""}
+                      onChange={(e) => saveResponse({ machineryDieselUsage: e.target.value })}
+                      className="flex-grow bg-transparent outline-none"
+                    />
+                    <select
+                      value={responses.machineryDieselUnit || "litres"}
+                      onChange={(e) => saveResponse({ machineryDieselUnit: e.target.value })}
+                      className="bg-transparent text-gray-600 outline-none cursor-pointer w-24"
+                    >
+                      <option value="litres">litres</option>
+                      <option value="gallons">gallons</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
 {step === 9 && (
   <div className="space-y-4 mt-8">
@@ -800,45 +820,65 @@ const pageContent = {
 
     <h1 className="text-2xl font-bold">Business Travel</h1>
     <p className="text-sm text-gray-500">
-      Tip: If no data is available, you can estimate travel distances. If unsure, you can skip this step.
+      Tip: If no data is available, you can estimate travel distances.
     </p>
 
-    {[
-      { key: "train", label: "Train Travel" },
-      { key: "air", label: "Air Travel" },
-      { key: "bus", label: "Bus Travel" },
-      { key: "taxi", label: "Taxi Travel" },
-    ].map(({ key, label }) => (
-      <div key={key}>
-        <label className="block text-gray-700">{label}</label>
-        <div className="flex items-center border p-2 rounded w-full bg-gray-100">
-          <input
-            type="number"
-            min="0"
-            value={responses[`${key}Travel`] || ""}
-            onChange={(e) =>
-              saveResponse({
-                [`${key}Travel`]: e.target.value,
-                [`${key}Unit`]: responses[`${key}Unit`] || "km", // Ensure unit is stored
-              })
-            }
-            className="flex-grow bg-transparent outline-none"
-          />
-          <select
-            value={responses[`${key}Unit`] || "km"}
-            onChange={(e) =>
-              saveResponse({
-                [`${key}Unit`]: e.target.value,
-              })
-            }
-            className="bg-transparent text-gray-600 outline-none cursor-pointer w-20"
-          >
-            <option value="km">km</option>
-            <option value="mi">mi</option>
-          </select>
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={responses.noBusinessTravel || false}
+        onChange={(e) =>
+          saveResponse({
+            noBusinessTravel: e.target.checked,
+            trainTravel: e.target.checked ? "" : responses.trainTravel || "",
+            airTravel: e.target.checked ? "" : responses.airTravel || "",
+            busTravel: e.target.checked ? "" : responses.busTravel || "",
+            taxiTravel: e.target.checked ? "" : responses.taxiTravel || "",
+          })
+        }
+        className="w-5 h-5"
+      />
+      <span>There was no business travel in this period</span>
+    </label>
+
+    {/* Travel Inputs (Only show if "No Business Travel" is NOT checked) */}
+    {!responses.noBusinessTravel &&
+      [
+        { key: "train", label: "Train Travel" },
+        { key: "air", label: "Air Travel" },
+        { key: "bus", label: "Bus Travel" },
+        { key: "taxi", label: "Taxi Travel" },
+      ].map(({ key, label }) => (
+        <div key={key}>
+          <label className="block text-gray-700">{label}</label>
+          <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+            <input
+              type="number"
+              min="0"
+              value={responses[`${key}Travel`] || ""}
+              onChange={(e) =>
+                saveResponse({
+                  [`${key}Travel`]: e.target.value,
+                  [`${key}Unit`]: responses[`${key}Unit`] || "km", // Ensure unit is stored
+                })
+              }
+              className="flex-grow bg-transparent outline-none"
+            />
+            <select
+              value={responses[`${key}Unit`] || "km"}
+              onChange={(e) =>
+                saveResponse({
+                  [`${key}Unit`]: e.target.value,
+                })
+              }
+              className="bg-transparent text-gray-600 outline-none cursor-pointer w-20"
+            >
+              <option value="km">km</option>
+              <option value="mi">mi</option>
+            </select>
+          </div>
         </div>
-      </div>
-    ))}
+      ))}
   </div>
 )}
 
@@ -851,43 +891,100 @@ const pageContent = {
 
     <h1 className="text-2xl font-bold">Business Travel - Hotel Stays</h1>
     <p className="text-sm text-gray-500">
-      Tip: Capture any relevant emissions that weren’t covered in previous steps.
+      Tip: Make sure the value provided is the total number of nights spent per person.
     </p>
 
-    {/* Hotel Stays Input */}
-    <label className="block text-gray-700">Hotel Nights</label>
-    <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+    <label className="flex items-center space-x-2 cursor-pointer">
       <input
-        type="number"
-        min="0"
-        value={responses.hotelNights || ""}
-        onChange={(e) => saveResponse({ hotelNights: e.target.value })}
-        className="flex-grow bg-transparent outline-none"
+        type="checkbox"
+        checked={responses.noHotelNights || false}
+        onChange={(e) =>
+          saveResponse({
+            noHotelNights: e.target.checked,
+            hotelNights: e.target.checked ? "" : responses.hotelNights || "",
+          })
+        }
+        className="w-5 h-5"
       />
-      <span className="ml-2 text-gray-600">person/nights</span>
-    </div>
+      <span>There was no hotel stays in this period</span>
+    </label>
+
+    {/* Hotel Stays Input (Only show if "No Business Travel" is NOT checked) */}
+    {!responses.noHotelNights && (
+      <>
+        <label className="block text-gray-700">Hotel Nights</label>
+        <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+          <input
+            type="number"
+            min="0"
+            value={responses.hotelNights || ""}
+            onChange={(e) => saveResponse({ hotelNights: e.target.value })}
+            className="flex-grow bg-transparent outline-none"
+          />
+          <span className="ml-2 text-gray-600">person/nights</span>
+        </div>
+      </>
+    )}
   </div>
 )}
 
-{step === 11 && (
-  <div className="space-y-4 mt-8">
+
+          {step === 11 && (
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+              </p>
+
+              <h1 className="text-2xl font-bold">Other Business Expenses</h1>
+              <p className="text-sm text-gray-500">
+                Tip: Capture any relevant emissions that weren’t covered in previous steps.
+              </p>
+
+              {/* Additional Expenses */}
+              <label className="block text-gray-700">Other Expenses</label>
+              <input
+                type="text"
+                value={responses.otherExpenses || ""}
+                onChange={(e) => saveResponse({ otherExpenses: e.target.value })}
+                className="border p-2 rounded w-full bg-gray-100"
+              />
+            </div>
+          )}
+
+{step === 12 && (
+  <div className="space-y-6 mt-8">
     <p className="text-sm text-gray-600 mb-4">
       From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
     </p>
 
-    <h1 className="text-2xl font-bold">Other Business Expenses</h1>
+    <h1 className="text-2xl font-bold">Summary & Final Calculation</h1>
     <p className="text-sm text-gray-500">
-      Tip: Capture any relevant emissions that weren’t covered in previous steps.
+      Review your inputs below. Steps marked with ✅ are complete. Click on any incomplete step to edit it.
     </p>
 
-    {/* Additional Expenses */}
-    <label className="block text-gray-700">Other Expenses</label>
-    <input
-      type="text"
-      value={responses.otherExpenses || ""}
-      onChange={(e) => saveResponse({ otherExpenses: e.target.value })}
-      className="border p-2 rounded w-full bg-gray-100"
-    />
+    {/* Summary List */}
+    <div className="space-y-2 mt-4">
+      {Object.keys(pageContent).map((key) => {
+        const stepNumber = parseInt(key);
+        if (stepNumber >= 12) return null; // Skip current step
+
+        return (
+          <div key={stepNumber} className="flex justify-between items-center border p-2 rounded bg-gray-100">
+            <span>{pageContent[stepNumber].title}</span>
+            {isStepComplete(stepNumber) ? (
+              <span className="text-green-500 font-bold">✅</span>
+            ) : (
+              <button
+                onClick={() => router.push(`/survey/company/${stepNumber}`)}
+                className="text-red-500 underline text-sm"
+              >
+                Incomplete - click to review
+              </button>
+            )}
+          </div>
+        );
+      })}
+    </div>
   </div>
 )}
 
@@ -896,7 +993,7 @@ const pageContent = {
 
       <SurveyNavigation
           step={step}
-          totalSteps={11}  
+          totalSteps={12}  
           handleNext={handleNext}
           handleBack={handleBack}
           isCompanyDataSection={true}  
