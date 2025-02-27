@@ -953,13 +953,10 @@ const pageContent = {
 
 {step === 12 && (
   <div className="space-y-6 mt-8">
-    <p className="text-sm text-gray-600 mb-4">
-      From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
-    </p>
-
-    <h1 className="text-2xl font-bold">Summary & Final Calculation</h1>
+  
+    <h1 className="text-2xl font-bold">Data Summary & Validation</h1>
     <p className="text-sm text-gray-500">
-      Review your inputs below. Steps marked with ✅ are complete. Click on any incomplete step to edit it.
+      Review your inputs below. Click on any incomplete step to edit it, then click calculate to run your report for {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}.
     </p>
 
     {/* Summary List */}
@@ -972,11 +969,11 @@ const pageContent = {
           <div key={stepNumber} className="flex justify-between items-center border p-2 rounded bg-gray-100">
             <span>{pageContent[stepNumber].title}</span>
             {isStepComplete(stepNumber) ? (
-              <span className="text-green-500 font-bold">✅</span>
+              <span className="text-green-500 font-bold">Complete</span>
             ) : (
               <button
                 onClick={() => router.push(`/survey/company/${stepNumber}`)}
-                className="text-red-500 underline text-sm"
+                className="text-red-500 font-bold underline"
               >
                 Incomplete - click to review
               </button>
