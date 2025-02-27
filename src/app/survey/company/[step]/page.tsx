@@ -21,14 +21,15 @@ export default function CompanySurvey() {
     employees: "",
     workFromHomePercentage: "",
     revenue: "",
+    revenueCurrency: "",
     facilities: "",
     vehicles: "",
     machinery: "",
     electricity: "",
     heating: "",
     businessTravel: "",
-    otherExpenses: "",
-    currencyCode: "",
+    totalExpenditure: "",
+    expensesCurrency: "",
     companyLocation: "",
   });
 
@@ -129,10 +130,10 @@ export default function CompanySurvey() {
                responses.commuteTrain ||
                responses.commuteBus ||
                responses.commuteCar;
-      case 12:  // Previously step 11 (Other Expenses)
-        return responses.otherExpenses.trim() !== "";
-      case 13:  // Previously step 12 (Summary)
-        return true; // Summary is always accessible
+      case 12:
+        return responses.totalExpenditure &&
+         parseFloat(responses.totalExpenditure) > 0 &&
+         Object.keys(responses).some((key) => !isNaN(parseFloat(responses[key])) && parseFloat(responses[key]) > 0);
       default:
         return false;
     }
@@ -273,8 +274,7 @@ const pageContent = {
       {/* Two-Column Layout */}
       <div className="bg-white rounded-lg shadow-md mt-4 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 md:min-h-[600px]">
         {/* Left Column */}
-<div className="bg-primary p-10 text-white md:rounded-l-lg relative flex flex-col justify-between items-center">
-  
+          <div className="bg-primary p-10 text-white md:rounded-l-lg relative flex flex-col items-center">
   {/* SME Logo (Fixed at Top Left) */}
   <Image 
     src="/logos/SMECH_logo_white.svg" 
@@ -284,19 +284,19 @@ const pageContent = {
     className="absolute top-6 left-6"
   />
 
-  {/* Dynamic Image with Mobile-Specific Top Margin */}
-  <div className="flex justify-center items-center flex-grow mt-14 sm:mt-10 md:mt-0">
+  {/* Dynamic Image - Kept Near the Top */}
+  <div className="mt-20">
     <Image 
       src={pageContent[step]?.image || "/illustrations/Analytics-amico.svg"}
       alt={pageContent[step]?.title || "Company Data"} 
       width={200} 
       height={200} 
-      className="h-auto" 
+      className="h-auto"
     />
   </div>
 
   {/* Dynamic Title */}
-  <h2 className="text-2xl font-bold text-center mt-4">
+  <h2 className="text-2xl font-bold text-center mt-6">
     {pageContent[step]?.title || "Company Data"}
   </h2>
 
@@ -309,7 +309,7 @@ const pageContent = {
 
 
         {/* Right Column */}
-        <div className="p-6 pt-4">
+        <div className="p-6 pt-0">
         {step === 1 && (
             <div className="space-y-4 mt-8">
             {/* Dynamic Date Range */}
@@ -432,8 +432,8 @@ const pageContent = {
 
                 {/* Currency Dropdown */}
                 <select
-                  value={responses.currencyCode || ""}
-                  onChange={(e) => saveResponse({ currencyCode: e.target.value })}
+                  value={responses.revenueCurrency || ""}
+                  onChange={(e) => saveResponse({ revenueCurrency: e.target.value })}
                   className="ml-2 bg-transparent text-gray-600 outline-none cursor-pointer w-[100px] text-left"
                 >
                   {uniqueCurrencies.map((currencyCode) => (
@@ -823,249 +823,386 @@ const pageContent = {
             </div>
           )}
 
-{step === 9 && (
-  <div className="space-y-4 mt-8">
-    <p className="text-sm text-gray-600 mb-4">
-      From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
-    </p>
+          {step === 9 && (
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+              </p>
 
-    <h1 className="text-2xl font-bold">Business Travel</h1>
-    <p className="text-sm text-gray-500">
-      Tip: If no data is available, you can estimate travel distances.
-    </p>
+              <h1 className="text-2xl font-bold">Business Travel</h1>
+              <p className="text-sm text-gray-500">
+                Tip: If no data is available, you can estimate travel distances.
+              </p>
 
-    <label className="flex items-center space-x-2 cursor-pointer">
-      <input
-        type="checkbox"
-        checked={responses.noBusinessTravel || false}
-        onChange={(e) =>
-          saveResponse({
-            noBusinessTravel: e.target.checked,
-            trainTravel: e.target.checked ? "" : responses.trainTravel || "",
-            airTravel: e.target.checked ? "" : responses.airTravel || "",
-            busTravel: e.target.checked ? "" : responses.busTravel || "",
-            taxiTravel: e.target.checked ? "" : responses.taxiTravel || "",
-          })
-        }
-        className="w-5 h-5"
-      />
-      <span>There was no business travel in this period</span>
-    </label>
+              {/* Travel Inputs (Only show if "No Business Travel" is NOT checked) */}
+              {!responses.noBusinessTravel &&
+                [
+                  { key: "train", label: "Train Travel" },
+                  { key: "air", label: "Air Travel" },
+                  { key: "bus", label: "Bus Travel" },
+                  { key: "taxi", label: "Taxi Travel" },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="block text-gray-700">{label}</label>
+                    <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                      <input
+                        type="number"
+                        min="0"
+                        value={responses[`${key}Travel`] || ""}
+                        onChange={(e) =>
+                          saveResponse({
+                            [`${key}Travel`]: e.target.value,
+                            [`${key}Unit`]: responses[`${key}Unit`] || "km", // Ensure unit is stored
+                          })
+                        }
+                        className="flex-grow bg-transparent outline-none"
+                      />
+                      <select
+                        value={responses[`${key}Unit`] || "km"}
+                        onChange={(e) =>
+                          saveResponse({
+                            [`${key}Unit`]: e.target.value,
+                          })
+                        }
+                        className="bg-transparent text-gray-600 outline-none cursor-pointer w-20"
+                      >
+                        <option value="km">km</option>
+                        <option value="mi">mi</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
 
-    {/* Travel Inputs (Only show if "No Business Travel" is NOT checked) */}
-    {!responses.noBusinessTravel &&
-      [
-        { key: "train", label: "Train Travel" },
-        { key: "air", label: "Air Travel" },
-        { key: "bus", label: "Bus Travel" },
-        { key: "taxi", label: "Taxi Travel" },
-      ].map(({ key, label }) => (
-        <div key={key}>
-          <label className="block text-gray-700">{label}</label>
-          <div className="flex items-center border p-2 rounded w-full bg-gray-100">
-            <input
-              type="number"
-              min="0"
-              value={responses[`${key}Travel`] || ""}
-              onChange={(e) =>
-                saveResponse({
-                  [`${key}Travel`]: e.target.value,
-                  [`${key}Unit`]: responses[`${key}Unit`] || "km", // Ensure unit is stored
-                })
-              }
-              className="flex-grow bg-transparent outline-none"
-            />
-            <select
-              value={responses[`${key}Unit`] || "km"}
-              onChange={(e) =>
-                saveResponse({
-                  [`${key}Unit`]: e.target.value,
-                })
-              }
-              className="bg-transparent text-gray-600 outline-none cursor-pointer w-20"
-            >
-              <option value="km">km</option>
-              <option value="mi">mi</option>
-            </select>
-          </div>
-        </div>
-      ))}
-  </div>
-)}
-
-
-{step === 10 && (
-  <div className="space-y-4 mt-8">
-    <p className="text-sm text-gray-600 mb-4">
-      From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
-    </p>
-
-    <h1 className="text-2xl font-bold">Business Travel - Hotel Stays</h1>
-    <p className="text-sm text-gray-500">
-      Tip: Make sure the value provided is the total number of nights spent per person.
-    </p>
-
-    <label className="flex items-center space-x-2 cursor-pointer">
-      <input
-        type="checkbox"
-        checked={responses.noHotelNights || false}
-        onChange={(e) =>
-          saveResponse({
-            noHotelNights: e.target.checked,
-            hotelNights: e.target.checked ? "" : responses.hotelNights || "",
-          })
-        }
-        className="w-5 h-5"
-      />
-      <span>There was no hotel stays in this period</span>
-    </label>
-
-    {/* Hotel Stays Input (Only show if "No Business Travel" is NOT checked) */}
-    {!responses.noHotelNights && (
-      <>
-        <label className="block text-gray-700">Hotel Nights</label>
-        <div className="flex items-center border p-2 rounded w-full bg-gray-100">
-          <input
-            type="number"
-            min="0"
-            value={responses.hotelNights || ""}
-            onChange={(e) => saveResponse({ hotelNights: e.target.value })}
-            className="flex-grow bg-transparent outline-none"
-          />
-          <span className="ml-2 text-gray-600">person/nights</span>
-        </div>
-      </>
-    )}
-  </div>
-)}
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={responses.noBusinessTravel || false}
+                  onChange={(e) =>
+                    saveResponse({
+                      noBusinessTravel: e.target.checked,
+                      trainTravel: e.target.checked ? "" : responses.trainTravel || "",
+                      airTravel: e.target.checked ? "" : responses.airTravel || "",
+                      busTravel: e.target.checked ? "" : responses.busTravel || "",
+                      taxiTravel: e.target.checked ? "" : responses.taxiTravel || "",
+                    })
+                  }
+                  className="w-5 h-5"
+                />
+                <span>There was no business travel in this period</span>
+              </label>
+            </div>
+          )}
 
 
-{step === 11 && (
-  <div className="space-y-4 mt-8">
-    <p className="text-sm text-gray-600 mb-4">
-      From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
-    </p>
+          {step === 10 && (
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+              </p>
 
-    <h1 className="text-2xl font-bold">Employee Commuting</h1>
-    <p className="text-sm text-gray-500">
-      Tip: If no data is available, you can estimate commuting distances based on employee habits.
-    </p>
+              <h1 className="text-2xl font-bold">Business Travel - Hotel Stays</h1>
+              <p className="text-sm text-gray-500">
+                Tip: Make sure the value provided is the total number of nights spent per person.
+              </p>
 
-    {/* No Employee Commuting Checkbox */}
-    <label className="flex items-center space-x-2 cursor-pointer">
-      <input
-        type="checkbox"
-        checked={responses.noEmployeeCommuting || false}
-        onChange={(e) =>
-          saveResponse({
-            noEmployeeCommuting: e.target.checked,
-            commuteTrain: e.target.checked ? "" : responses.commuteTrain || "",
-            commuteAir: e.target.checked ? "" : responses.commuteAir || "",
-            commuteBus: e.target.checked ? "" : responses.commuteBus || "",
-            commuteCar: e.target.checked ? "" : responses.commuteCar || "",
-          })
-        }
-        className="w-5 h-5"
-      />
-      <span>There was no employee commuting in this period</span>
-    </label>
+              
 
-    {/* Commuting Inputs (Only show if "No Employee Commuting" is NOT checked) */}
-    {!responses.noEmployeeCommuting &&
-      [
-        { key: "commuteTrain", label: "Train Travel" },
-        { key: "commuteBus", label: "Bus Travel" },
-        { key: "commuteCar", label: "Car Travel" },
-      ].map(({ key, label }) => (
-        <div key={key}>
-          <label className="block text-gray-700">{label}</label>
-          <div className="flex items-center border p-2 rounded w-full bg-gray-100">
-            <input
-              type="number"
-              min="0"
-              value={responses[key] || ""}
-              onChange={(e) =>
-                saveResponse({
-                  [key]: e.target.value,
-                  [`${key}Unit`]: responses[`${key}Unit`] || "km", // Ensure unit is stored
-                })
-              }
-              className="flex-grow bg-transparent outline-none"
-            />
-            <select
-              value={responses[`${key}Unit`] || "km"}
-              onChange={(e) =>
-                saveResponse({
-                  [`${key}Unit`]: e.target.value,
-                })
-              }
-              className="bg-transparent text-gray-600 outline-none cursor-pointer w-20"
-            >
-              <option value="km">km</option>
-              <option value="mi">mi</option>
-            </select>
-          </div>
-        </div>
-      ))}
-  </div>
-)}
+              {/* Hotel Stays Input (Only show if "No Business Travel" is NOT checked) */}
+              {!responses.noHotelNights && (
+                <>
+                  <label className="block text-gray-700">Hotel Nights</label>
+                  <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                    <input
+                      type="number"
+                      min="0"
+                      value={responses.hotelNights || ""}
+                      onChange={(e) => saveResponse({ hotelNights: e.target.value })}
+                      className="flex-grow bg-transparent outline-none"
+                    />
+                    <span className="ml-2 text-gray-600">person/nights</span>
+                  </div>
+                </>
+              )}
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={responses.noHotelNights || false}
+                  onChange={(e) =>
+                    saveResponse({
+                      noHotelNights: e.target.checked,
+                      hotelNights: e.target.checked ? "" : responses.hotelNights || "",
+                    })
+                  }
+                  className="w-5 h-5"
+                />
+                <span>There was no hotel stays in this period</span>
+              </label>
+            </div>
+          )}
 
-{step === 12 && (
-  <div className="space-y-4 mt-8">
-    <p className="text-sm text-gray-600 mb-4">
-      From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
-    </p>
 
-    <h1 className="text-2xl font-bold">Other Business Expenses</h1>
-    <p className="text-sm text-gray-500">
-      Tip: Capture any relevant emissions that weren’t covered in previous steps.
-    </p>
+          {step === 11 && (
+            <div className="space-y-4 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+              </p>
 
-    {/* Additional Expenses */}
-    <label className="block text-gray-700">Other Expenses</label>
-    <input
-      type="text"
-      value={responses.otherExpenses || ""}
-      onChange={(e) => saveResponse({ otherExpenses: e.target.value })}
-      className="border p-2 rounded w-full bg-gray-100"
-    />
-  </div>
-)}
+              <h1 className="text-2xl font-bold">Employee Commuting</h1>
+              <p className="text-sm text-gray-500">
+                Tip: If no data is available, you can estimate commuting distances based on employee habits.
+              </p>
 
-{step === 13 && (
-  <div className="space-y-6 mt-8">
-  
-    <h1 className="text-2xl font-bold">Data Summary & Validation</h1>
-    <p className="text-sm text-gray-500">
-      Review your inputs below. Click on any incomplete step to edit it, then click calculate to run your report for {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}.
-    </p>
+              
 
-    {/* Summary List */}
-    <div className="space-y-2 mt-4">
-      {Object.keys(pageContent).map((key) => {
-        const stepNumber = parseInt(key);
-        if (stepNumber >= 13) return null; // Skip current step
+              {/* Commuting Inputs (Only show if "No Employee Commuting" is NOT checked) */}
+              {!responses.noEmployeeCommuting &&
+                [
+                  { key: "commuteTrain", label: "Train Travel" },
+                  { key: "commuteBus", label: "Bus Travel" },
+                  { key: "commuteCar", label: "Car Travel" },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="block text-gray-700">{label}</label>
+                    <div className="flex items-center border p-2 rounded w-full bg-gray-100">
+                      <input
+                        type="number"
+                        min="0"
+                        value={responses[key] || ""}
+                        onChange={(e) =>
+                          saveResponse({
+                            [key]: e.target.value,
+                            [`${key}Unit`]: responses[`${key}Unit`] || "km", // Ensure unit is stored
+                          })
+                        }
+                        className="flex-grow bg-transparent outline-none"
+                      />
+                      <select
+                        value={responses[`${key}Unit`] || "km"}
+                        onChange={(e) =>
+                          saveResponse({
+                            [`${key}Unit`]: e.target.value,
+                          })
+                        }
+                        className="bg-transparent text-gray-600 outline-none cursor-pointer w-20"
+                      >
+                        <option value="km">km</option>
+                        <option value="mi">mi</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
+                {/* No Employee Commuting Checkbox */}
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={responses.noEmployeeCommuting || false}
+                  onChange={(e) =>
+                    saveResponse({
+                      noEmployeeCommuting: e.target.checked,
+                      commuteTrain: e.target.checked ? "" : responses.commuteTrain || "",
+                      commuteAir: e.target.checked ? "" : responses.commuteAir || "",
+                      commuteBus: e.target.checked ? "" : responses.commuteBus || "",
+                      commuteCar: e.target.checked ? "" : responses.commuteCar || "",
+                    })
+                  }
+                  className="w-5 h-5"
+                />
+                <span>There was no employee commuting in this period</span>
+              </label>
+            </div>
+          )}
 
-        return (
-          <div key={stepNumber} className="flex justify-between items-center border p-2 rounded bg-gray-100">
-            <span>{pageContent[stepNumber].title}</span>
-            {isStepComplete(stepNumber) ? (
-              <span className="text-secondary font-bold">Complete</span>
-            ) : (
-              <button
-                onClick={() => router.push(`/survey/company/${stepNumber}`)}
-                className="text-red-400 font-bold underline"
-              >
-                Incomplete - click to review
-              </button>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  </div>
-)}
+          {step === 12 && (
+            <div className="space-y-6 mt-8">
+              <p className="text-sm text-gray-600 mb-4">
+                From {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}
+              </p>
 
+              <h1 className="text-2xl font-bold">Company Expenses</h1>
+              <p className="text-sm text-gray-500">
+                Capture your company’s expenditure across key categories. This helps estimate emissions from purchased goods and services.
+              </p>
+
+              {/* Total Expenditure Input */}
+              <label className="block text-gray-700 text-base font-medium">Total Expenditure</label>
+              <div className="flex items-center border p-2 rounded-lg w-full bg-gray-100">
+                <input
+                  type="number"
+                  value={responses.totalExpenditure || ""}
+                  onChange={(e) => saveResponse({ ...responses, totalExpenditure: e.target.value })}
+                  className="flex-grow bg-transparent outline-none text-base font-medium"
+                  placeholder="Enter amount"
+                />
+                <select
+                  value={responses.expensesCurrency || ""}
+                  onChange={(e) => saveResponse({ expensesCurrency: e.target.value })}
+                  className="ml-2 bg-transparent text-gray-700 outline-none cursor-pointer w-[100px] text-left text-base font-medium"
+                >
+                  {uniqueCurrencies.map((currencyCode) => (
+                    <option key={currencyCode} value={currencyCode}>
+                      {currencyCode}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Show categories ONLY if total expenditure is set */}
+              {responses.totalExpenditure && (
+                [
+                  {
+                    key: "transport",
+                    title: "Transport / Freight",
+                    fields: ["Road Freight", "Air Freight", "Sea Freight", "Rail Freight", "Other transport services"],
+                  },
+                  {
+                    key: "materials",
+                    title: "Materials and Inventory",
+                    fields: [
+                      "Paper and packaging",
+                      "Textiles",
+                      "Plastic products",
+                      "Metal products",
+                      "Wood products",
+                      "Books, printed matter and recorded media",
+                      "Chemicals",
+                      "Food products",
+                      "Beverages",
+                      "Other manufactured goods/inventory",
+                    ],
+                  },
+                  {
+                    key: "capitalGoods",
+                    title: "Capital Goods",
+                    fields: [
+                      "Furniture and other general products",
+                      "Phones, television and communication equipment",
+                      "Computers and office machinery",
+                      "Vehicles",
+                      "Other machinery, tools and equipment",
+                    ],
+                  },
+                  {
+                    key: "businessServices",
+                    title: "Business Services",
+                    fields: [
+                      "Legal, accounting and business consultancy services",
+                      "Software, hosting, computer programming & related activities",
+                      "Insurance and pension funding",
+                      "Financial intermediation",
+                      "Construction and maintenance work",
+                      "Corporate entertainment",
+                    ],
+                  },
+                ].map((category) => (
+                  <details key={category.key} className="bg-gray-100 p-4 rounded-md">
+                    <summary className="cursor-pointer text-base font-medium">{category.title}</summary>
+                    <div className="mt-4 space-y-2">
+                      {category.fields.map((field) => {
+                        const variableName = `expenses${category.title.split(" ")[0]}${field.split(" ")[0]}`; // Generate variable name
+                        
+                        return (
+                          <div key={variableName}>
+                            <label className="block text-gray-700 text-sm">{field}</label>
+                            <div className="flex items-center border p-2 rounded w-full bg-white">
+                              <input
+                                type="number"
+                                min="0"
+                                value={responses[variableName] || ""}
+                                onChange={(e) => saveResponse({ ...responses, [variableName]: e.target.value })}
+                                className="flex-grow bg-transparent outline-none text-base"
+                                placeholder="0"
+                              />
+                              <span className="ml-2 text-gray-600 text-base">{responses.expensesCurrency || "Currency"}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </details>
+                ))
+              )}
+
+              {/* Total Calculation */}
+              {responses.totalExpenditure && (
+                <div className="mt-6 border-t pt-4">
+                  {(() => {
+                    const totalCaptured = Object.keys(responses)
+                      .filter((key) => key.startsWith("expenses") && !isNaN(Number(responses[key])))
+                      .reduce((acc, key) => acc + Number(responses[key] || "0"), 0);
+
+                    const totalExpenditure = parseFloat(responses.totalExpenditure) || 0;
+                    const percentage = totalExpenditure ? Math.min((totalCaptured / totalExpenditure) * 100, 100) : 0;
+                    
+                    let coverageLabel = "Low";
+                    let barColor = "bg-red-500";
+
+                    if (percentage > 66) {
+                      coverageLabel = "High";
+                      barColor = "bg-green-500";
+                    } else if (percentage > 33) {
+                      coverageLabel = "Medium";
+                      barColor = "bg-orange-500";
+                    }
+
+                    return (
+                      <>
+                        <p className="text-base font-medium text-gray-700">
+                          {totalCaptured.toLocaleString()} of total expenditure of {totalExpenditure.toLocaleString()} {responses.expensesCurrency} captured so far
+                        </p>
+
+                        {/* Expenditure Coverage Bar */}
+                        <div className="relative w-full h-3 bg-gray-300 rounded-full mt-2">
+                          <div
+                            className={`absolute top-0 left-0 h-3 ${barColor} rounded-full`}
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+
+                        <p className="mt-1 text-sm text-gray-600">
+                          Expenditure coverage: <span className="font-medium">{coverageLabel}</span>
+                        </p>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
+
+
+          {step === 13 && (
+            <div className="space-y-6 mt-8">
+            
+              <h1 className="text-2xl font-bold">Data Summary & Validation</h1>
+              <p className="text-sm text-gray-500">
+                Review your inputs below. Click on any incomplete step to edit it, then click calculate to run your report for {formatDate(responses.timePeriodFrom)} to {formatDate(responses.timePeriodTo)}.
+              </p>
+
+              {/* Summary List */}
+              <div className="space-y-2 mt-4">
+                {Object.keys(pageContent).map((key) => {
+                  const stepNumber = parseInt(key);
+                  if (stepNumber >= 13) return null; // Skip current step
+
+                  return (
+                    <div key={stepNumber} className="flex justify-between items-center border p-2 rounded bg-gray-100">
+                      <span>{pageContent[stepNumber].title}</span>
+                      {isStepComplete(stepNumber) ? (
+                        <span className="text-secondary font-bold">Complete</span>
+                      ) : (
+                        <button
+                          onClick={() => router.push(`/survey/company/${stepNumber}`)}
+                          className="text-red-400 font-bold underline"
+                        >
+                          Incomplete - click to review
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
         </div>
       </div>
