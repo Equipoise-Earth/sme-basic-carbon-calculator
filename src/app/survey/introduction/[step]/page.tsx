@@ -208,9 +208,12 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
                 value={responses.companyLocation}
                 onChange={(e) => {
                   const selectedCountry = COUNTRIES.find(country => country.locode === e.target.value);
+                  const defaultCurrency = selectedCountry?.currencyCode || "";
+
                   saveResponse({ 
                     companyLocation: e.target.value,
-                    currencyCode: selectedCountry?.currencyCode || "" 
+                    revenueCurrency: responses.revenueCurrency || defaultCurrency,
+                    expensesCurrency: responses.expensesCurrency || defaultCurrency
                   });
                 }}
                 className="border p-2 rounded w-full mt-4 text-center">
@@ -221,6 +224,7 @@ const saveResponse = async (newData: Partial<typeof responses>) => {
                   </option>
                 ))}
               </select>
+
             </div>
           )}
   
