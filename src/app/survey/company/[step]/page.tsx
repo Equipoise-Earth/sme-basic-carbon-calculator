@@ -1056,7 +1056,7 @@
                     {
                       key: "transport",
                       title: "Transport / Freight",
-                      fields: ["Road Freight", "Air Freight", "Sea Freight", "Rail Freight", "Other transport services"],
+                      fields: ["Road Freight", "Air Freight", "Sea Freight", "Rail Freight", "Other transport services (e.g. warehousing)"],
                     },
                     {
                       key: "materials",
