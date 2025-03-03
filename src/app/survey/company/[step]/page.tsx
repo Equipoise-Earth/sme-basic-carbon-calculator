@@ -335,7 +335,18 @@
                     <input
                       type="date"
                       value={responses.timePeriodTo || ""}
-                      onChange={(e) => saveResponse({ timePeriodTo: e.target.value })}
+                      min="2023-01-01"
+                      onChange={(e) => {
+                        const selectedDate = new Date(e.target.value);
+                        const minDate = new Date("2023-01-01");
+
+                        if (selectedDate < minDate) {
+                          alert("This calculator is designed to estimate emissions from the 2022-2023 financial year onwards only.");
+                          saveResponse({ timePeriodTo: "" }); // Reset invalid date
+                        } else {
+                          saveResponse({ timePeriodTo: e.target.value });
+                        }
+                      }}
                       className="border p-2 rounded w-full bg-gray-100"
                     />
                   </div>
