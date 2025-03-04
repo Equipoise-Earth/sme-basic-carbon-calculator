@@ -5,7 +5,7 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { COUNTRIES } from "@/app/data/countries";
-import { EXPENSE_EMISSION_FACTORS, CAPITAL_GOODS_CATEGORIES } from "@/app/data/emissionFactors";
+import { EXPENSE_EMISSION_FACTORS, CAPITAL_GOODS_CATEGORIES, HEATING_EMISSION_FACTORS } from "@/app/data/emissionFactors";
 
 export default function Report() {
   const userId = "testUser123";
@@ -191,29 +191,30 @@ export default function Report() {
                 });
               });
 
-              const processed = apiData.results.map((result) => {
-                const emissionFactor = result?.emission_factor || {};
-                const activityId = emissionFactor.activity_id; // ✅ Match based on activity ID
+              const processed = batchRequests.map((request, index) => {
+                const response = apiData.results[index] || null;
+                const activityId = request.emission_factor.activity_id;
               
                 let categoryData = requestMappings[activityId];
-
-                // If no exact match, check if activityId starts with a known wildcard prefix
+              
+                // If no exact match, check for wildcard activity IDs
                 if (!categoryData) {
                   const matchingKey = Object.keys(requestMappings).find((key) =>
                     activityId.startsWith(key.replace("*", ""))
                   );
                   categoryData = requestMappings[matchingKey] || {};
                 }
-                
+              
                 return {
                   scope: categoryData.scope || "Unknown",
                   scopeCategory: categoryData.scopeCategory || "N/A",
                   scopeCategoryName: categoryData.scopeCategoryName || "Unknown",
-                  kgCO2e: result.co2e || "N/A", // Show "N/A" if no emissions data
-                  dataSource: emissionFactor.source || "Unknown",
-                  yearUsed: emissionFactor.year || "N/A",
+                  kgCO2e: response?.co2e || "N/A",
+                  dataSource: request.emission_factor.source || "Unknown",
+                  yearUsed: request.emission_factor.year || "N/A",
                   expensesCurrency: expensesCurrency,
-                  error: result?.error ? result.error.message : null,
+                  error: response?.error ? response.error.message : null,
+                  activityId: activityId, // ✅ Store activityId for debugging
                 };
               });
 
@@ -253,9 +254,9 @@ export default function Report() {
               processed.sort((a, b) => {
                 const indexA = CATEGORY_ORDER.indexOf(a.scopeCategoryName);
                 const indexB = CATEGORY_ORDER.indexOf(b.scopeCategoryName);
-                return indexA - indexB;
+                return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
               });
-
+              
               // Step 2: Log any errors
               const errors = processed
                 .filter(item => item.error)
@@ -281,6 +282,7 @@ export default function Report() {
 
             fetchDataAndCalculateEmissions();
           }, []);
+
 
           return (
               <div className="max-w-4xl mx-auto p-6">
@@ -309,7 +311,7 @@ export default function Report() {
               </button>
               {expandedIndex === index && (
                 <pre className="bg-gray-100 p-4 mt-2 text-sm overflow-auto">
-                  {JSON.stringify(apiLogs[index], null, 2)}
+                {JSON.stringify(apiLogs.find(log => log.request.emission_factor.activity_id === item.activityId) || {}, null, 2)}
                 </pre>
               )}
             </div>

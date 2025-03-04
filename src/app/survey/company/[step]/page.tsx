@@ -160,8 +160,8 @@
     const now = new Date();
     const year = now.getFullYear();
     saveResponse({
-      timePeriodFrom: `${year - 2}-04-01`,
-      timePeriodTo: `${year - 1}-03-31`,
+      timePeriodFrom: `${year - 1}-04-01`,
+      timePeriodTo: `${year - 0}-03-31`,
     });
   };
 
@@ -314,60 +314,98 @@
           {/* Right Column */}
           <div className="p-6 pt-0">
           {step === 1 && (
-              <div className="space-y-4 mt-8">
-              {/* Dynamic Date Range */}
-              <p className="text-sm text-gray-600 mb-4">&nbsp;</p>
-                <h1 className="text-2xl font-bold">What is the time period you want to calculate emissions for?</h1>
+            <div className="space-y-4 mt-8">
+              <h1 className="text-2xl font-bold">What is the time period you want to calculate emissions for?</h1>
 
-                <div className="flex gap-4 mt-4">
-                  <div className="flex-1">
-                    <label className="block text-sm text-gray-600">From:</label>
-                    <input
-                      type="date"
-                      value={responses.timePeriodFrom || ""}
-                      onChange={(e) => saveResponse({ timePeriodFrom: e.target.value })}
-                      className="border p-2 rounded w-full bg-gray-100"
-                    />
-                  </div>
+              <div className="flex gap-4 mt-4">
+                {/* FROM DATE INPUT */}
+                <div className="flex-1">
+                  <label className="block text-sm text-gray-600">From:</label>
+                  <input
+                    type="date"
+                    value={responses.timePeriodFrom || ""}
+                    onChange={(e) => {
+                      const fromDate = new Date(e.target.value);
+                      const minFromDate = new Date("2022-03-01");
+                      const toDate = responses.timePeriodTo ? new Date(responses.timePeriodTo) : null;
 
-                  <div className="flex-1">
-                    <label className="block text-sm text-gray-600">To:</label>
-                    <input
-                      type="date"
-                      value={responses.timePeriodTo || ""}
-                      min="2023-01-01"
-                      onChange={(e) => {
-                        const selectedDate = new Date(e.target.value);
-                        const minDate = new Date("2023-01-01");
-
-                        if (selectedDate < minDate) {
-                          alert("This calculator is designed to estimate emissions from the 2022-2023 financial year onwards only.");
-                          saveResponse({ timePeriodTo: "" }); // Reset invalid date
-                        } else {
-                          saveResponse({ timePeriodTo: e.target.value });
-                        }
-                      }}
-                      className="border p-2 rounded w-full bg-gray-100"
-                    />
-                  </div>
+                      if (fromDate < minFromDate) {
+                        alert("The 'From' date cannot be before 1st March 2022.");
+                        saveResponse({ timePeriodFrom: "" });
+                      } else if (toDate && fromDate > toDate) {
+                        alert("The 'From' date cannot be after the 'To' date.");
+                        saveResponse({ timePeriodFrom: "" });
+                      } else {
+                        saveResponse({ timePeriodFrom: e.target.value });
+                      }
+                    }}
+                    className="border p-2 rounded w-full bg-gray-100"
+                  />
                 </div>
 
-                <div className="flex gap-4 mt-4">
-                  <button
-                    onClick={setLastFinancialYear}
-                    className="border border-black px-4 py-2 rounded hover:bg-gray-200"
-                  >
-                    Last Financial Year
-                  </button>
+                {/* TO DATE INPUT */}
+                <div className="flex-1">
+                  <label className="block text-sm text-gray-600">To:</label>
+                  <input
+                    type="date"
+                    value={responses.timePeriodTo || ""}
+                    onChange={(e) => {
+                      const toDate = new Date(e.target.value);
+                      const minToDate = new Date("2023-04-30");
+                      const fromDate = responses.timePeriodFrom ? new Date(responses.timePeriodFrom) : null;
 
-                  <button
-                    onClick={setLastCalendarYear}
-                    className="border border-black px-4 py-2 rounded hover:bg-gray-200"
-                  >
-                    Last Calendar Year
-                  </button>
+                      if (toDate < minToDate) {
+                        alert("The 'To' date cannot be before 30th April 2023.");
+                        saveResponse({ timePeriodTo: "" });
+                      } else if (fromDate && toDate < fromDate) {
+                        alert("The 'To' date cannot be before the 'From' date.");
+                        saveResponse({ timePeriodTo: "" });
+                      } else {
+                        saveResponse({ timePeriodTo: e.target.value });
+                      }
+                    }}
+                    className="border p-2 rounded w-full bg-gray-100"
+                  />
                 </div>
               </div>
+
+              {/* Display formatted date */}
+                <p className="text-gray-600 mt-2">
+                  Selected Period:{" "}
+                  {responses.timePeriodFrom
+                    ? new Date(responses.timePeriodFrom).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "Not selected"}{" "}
+                  –{" "}
+                  {responses.timePeriodTo
+                    ? new Date(responses.timePeriodTo).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "Not selected"}
+                </p>
+
+                    {/* BUTTONS FOR QUICK SELECTION */}
+                    <div className="flex gap-4 mt-4">
+                      <button
+                        onClick={setLastFinancialYear}
+                        className="border border-black px-4 py-2 rounded hover:bg-gray-200"
+                      >
+                        Last Financial Year
+                      </button>
+
+                      <button
+                        onClick={setLastCalendarYear}
+                        className="border border-black px-4 py-2 rounded hover:bg-gray-200"
+                      >
+                        Last Calendar Year
+                      </button>
+                    </div>
+                  </div>
             )}
 
             {step === 2 && (
