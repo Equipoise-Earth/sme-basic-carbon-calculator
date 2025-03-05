@@ -41,6 +41,8 @@
                 const reportingYear = userData.timePeriodTo ? new Date(userData.timePeriodTo).getFullYear() : 2024;
 
                 const batchRequests = [];
+                const requestMappings = {}; // Store request-category mappings
+
 
                 // ✅ **Base emissions calculations**
                 const electricityRequest = {
@@ -58,7 +60,12 @@
                     energy_unit: "kWh",
                   },
                 };
-                batchRequests.push(electricityRequest);
+            
+                batchRequests.push({
+                  ...electricityRequest,
+                  originalKey: "electricity",
+                });
+                
 
                 const homeworkingRequest = {
                   emission_factor: {
@@ -77,7 +84,54 @@
                       ((parseFloat(userData.workFromHomePercentage)) / 100),
                   },
                 };
-                batchRequests.push(homeworkingRequest);
+               
+                batchRequests.push({
+                  ...homeworkingRequest,
+                  originalKey: "workFromHomePercentage", 
+                });
+                
+                // ✅ **Heating emissions calculation**
+                if (
+                  userData.heatingMethod &&
+                  userData.heatingMethod !== "electricity" &&
+                  userData.heatingMethod !== "No heating at site" &&
+                  parseFloat(userData.heatingUsage) > 0
+                ) {
+                  const heatingActivityId = HEATING_EMISSION_FACTORS[userData.heatingMethod.toLowerCase()];
+
+                  if (!heatingActivityId) {
+                    console.warn(`⚠️ No emission factor found for heating method: "${userData.heatingMethod}"`);
+                  } else {
+                    console.log(`✅ Found heating mapping: ${userData.heatingMethod} → ${heatingActivityId}`);
+
+                    const heatingRequest = {
+                      emission_factor: {
+                        activity_id: heatingActivityId,
+                        region: "GB",
+                        year: reportingYear,
+                        data_version: "^20",
+                        year_fallback: true,
+                      },
+                      parameters: {
+                        energy: parseFloat(userData.heatingUsage),
+                        energy_unit: "kWh",
+                      },
+                    };
+
+                    batchRequests.push({
+                      ...heatingRequest,
+                      originalKey: "heating", // ✅ Store key to align with report logic
+                    });
+
+                    // ✅ Store category info mapped to heating
+                    requestMappings["heating"] = {
+                      scope: userData.heatingMethod.toLowerCase().includes("district") ? "2" : "1",
+                      scopeCategory: "1",
+                      scopeCategoryName: "Heating",
+                    };
+                  }
+                }
+
 
                 console.log("✅ Base requests added:", JSON.stringify(batchRequests, null, 2));
 
@@ -85,15 +139,13 @@
                 const validExpenseKeys = Object.keys(EXPENSE_EMISSION_FACTORS);
                 const relevantKeys = ["electricity", "workFromHomePercentage", ...validExpenseKeys];
 
-                const requestMappings = {}; // Store request-category mappings
-
-                requestMappings["electricity-supply_grid*"] = {
+                requestMappings["electricity"] = { 
                   scope: "2",
                   scopeCategory: "0",
                   scopeCategoryName: "Electricity",
                 };
-
-                requestMappings["homeworking-type_custom"] = {
+                
+                requestMappings["workFromHomePercentage"] = { 
                   scope: "3",
                   scopeCategory: "7",
                   scopeCategoryName: "Homeworking",
@@ -137,10 +189,14 @@
                       },
                     };
 
-                    batchRequests.push(request);
+                    batchRequests.push({
+                      ...request,
+                      originalKey: key, // ✅ Store key so we can retrieve it later
+                    });
+                    
 
                     // ✅ Store category info mapped to the activity ID
-                    requestMappings[activityId] = {
+                    requestMappings[key] = {
                       scope: "3",
                       scopeCategory: key.startsWith("expensesCapital") ? "2" : "1",
                       scopeCategoryName: key.replace("expenses", "").replace(/([A-Z])/g, " $1").trim(),
@@ -198,22 +254,19 @@
                 const processed = batchRequests.map((request, index) => {
                   const response = apiData.results[index] || null;
                   const activityId = request.emission_factor.activity_id;
+                  const originalKey = request.originalKey;
                 
-                  let categoryData = requestMappings[activityId];
+                  let categoryData = requestMappings[originalKey];
                 
-                  // If no exact match, check for wildcard activity IDs
                   if (!categoryData) {
-                    console.warn(`⚠️ No category data found for Activity ID: "${activityId}"`);
-                    const matchingKey = Object.keys(requestMappings).find((key) =>
-                      activityId.startsWith(key.replace("*", ""))
-                    );
-                    categoryData = requestMappings[matchingKey] || {};
+                    console.warn(`⚠️ No category data found for key: "${originalKey}". Using predefined mapping.`);
+                    categoryData = requestMappings[originalKey] || { scope: "Unknown", scopeCategory: "N/A", scopeCategoryName: "Unknown" };
                   }
                 
                   return {
                     scope: categoryData?.scope ?? "Unknown",
                     scopeCategory: categoryData?.scopeCategory ?? "N/A",
-                    scopeCategoryName: categoryData?.scopeCategoryName ?? "Unknown",
+                    scopeCategoryName: (categoryData?.scopeCategoryName ?? "Unknown").replace(/,\s*$/, ""),
                     kgCO2e: response?.co2e ?? "N/A",
                     dataSource: response?.emission_factor?.source ?? "Unknown",
                     yearUsed: response?.emission_factor?.year ?? "N/A",
@@ -222,6 +275,7 @@
                     activityId: activityId ?? "Unknown",
                   };
                 });
+                
 
                 // ✅ Define the correct order
                 const CATEGORY_ORDER = [

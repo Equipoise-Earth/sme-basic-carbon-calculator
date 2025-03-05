@@ -67,7 +67,7 @@
     const saveResponse = async (newData: Partial<typeof responses>) => {
       let updatedResponses = { ...responses, ...newData };
     
-      // Convert facilities to m² before saving
+      // ✅ Convert facilities to m² before saving
       if (newData.facilitiesRaw !== undefined) {
         if (updatedResponses.facilitiesUnit === "ft²") {
           updatedResponses.facilities = (parseFloat(newData.facilitiesRaw) / 10.764).toFixed(2);
@@ -75,6 +75,14 @@
           updatedResponses.facilities = newData.facilitiesRaw;
         }
       }
+    
+      // ✅ Remove empty fields before saving
+      Object.keys(updatedResponses).forEach((key) => {
+        if (updatedResponses[key] === "" || updatedResponses[key] === null || updatedResponses[key] === undefined) {
+          delete updatedResponses[key]; // 🔹 Ensure Firestore doesn't store empty fields
+        }
+      });
+      
     
       setResponses(updatedResponses);
       localStorage.setItem(`companyResponses_${userId}`, JSON.stringify(updatedResponses));
@@ -85,6 +93,7 @@
         console.error("Error saving to Firestore:", error);
       }
     };
+    
 
     const formatDate = (dateString: string) => {
       if (!dateString) return ""; // Return empty string if no date
@@ -664,12 +673,12 @@
                           onChange={(e) => {
                             const selectedMethod = e.target.value;
                             const shouldClearUsage = selectedMethod === "electricity" || selectedMethod === "No heating at site";
-
+                          
                             saveResponse({
                               heatingMethod: selectedMethod,
-                              heatingUsage: shouldClearUsage ? "" : responses.heatingUsage, // Preserve if relevant
+                              heatingUsage: shouldClearUsage ? "" : responses.heatingUsage ?? null, // 🔹 Ensure `null` instead of `undefined`
                             });
-                          }}
+                          }}                          
                           className="w-5 h-5"
                         />
                         <span>{option}</span>
