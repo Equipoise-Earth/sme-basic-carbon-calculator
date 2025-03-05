@@ -1151,7 +1151,9 @@
                       <summary className="cursor-pointer text-base font-medium">{category.title}</summary>
                       <div className="mt-4 space-y-2">
                         {category.fields.map((field) => {
-                          const variableName = `expenses${category.title.split(" ")[0]}${field.split(" ")[0]}`; // Generate variable name
+                          const variableName = `expenses${category.title.split(" ")[0].trim()}${field.split(" ")[0].trim()}`
+                          .replace(/[^a-zA-Z0-9]/g, "");
+                        
                           
                           return (
                             <div key={variableName}>

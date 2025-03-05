@@ -10,6 +10,7 @@
   export default function Report() {
     const userId = "testUser123";
     const [processedData, setProcessedData] = useState([]);
+    const [userData, setUserData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessages, setErrorMessages] = useState([]);
     const [apiLogs, setApiLogs] = useState([]); // ✅ Store API request/response pairs
@@ -28,6 +29,7 @@
 
                 const userData = docSnap.data();
                 console.log("🔎 Retrieved User Data:", userData);
+                setUserData(userData);
 
                 const countryDetails = COUNTRIES.find((c) => c.locode === userData.companyLocation);
                 if (!countryDetails) throw new Error(`Country not found for locode: ${userData.companyLocation}`);
@@ -52,7 +54,7 @@
                     year_fallback: true,
                   },
                   parameters: {
-                    energy: parseFloat(userData.electricity) || 1000,
+                    energy: parseFloat(userData.electricity),
                     energy_unit: "kWh",
                   },
                 };
@@ -64,14 +66,15 @@
                     region: regionCode,
                     year: reportingYear,
                     source_lca_activity: "unknown",
+                    year_fallback: true,
                     data_version: "^20",
                   },
                   parameters: {
                     number:
-                      (parseInt(userData.employees) || 10) *
+                      (parseInt(userData.employees)) *
                       8 *
                       220 *
-                      ((parseFloat(userData.workFromHomePercentage) || 0) / 100),
+                      ((parseFloat(userData.workFromHomePercentage)) / 100),
                   },
                 };
                 batchRequests.push(homeworkingRequest);
@@ -97,7 +100,8 @@
                 };
 
                 Object.entries(userData).forEach(([key, value]) => {
-                  // ✅ Ensure key belongs to an expected expense category
+                  console.log(`🔍 Checking key from Firestore: "${key}"`);
+                
                   if (
                     !key.startsWith("expensesBusiness") &&
                     !key.startsWith("expensesMaterials") &&
@@ -106,13 +110,13 @@
                   ) {
                     return;
                   }
-
-                  // ✅ Find corresponding activity ID from mapping
+                
                   const activityId = EXPENSE_EMISSION_FACTORS[key];
-
+                
                   if (!activityId) {
-                    console.warn(`⚠️ No activity ID found for key: ${key}`);
-                    return;
+                    console.warn(`⚠️ No activity ID found for key: "${key}"`);
+                  } else {
+                    console.log(`✅ Found mapping: ${key} → ${activityId}`);
                   }
 
                   if (parseFloat(value) > 0) {
@@ -199,6 +203,7 @@
                 
                   // If no exact match, check for wildcard activity IDs
                   if (!categoryData) {
+                    console.warn(`⚠️ No category data found for Activity ID: "${activityId}"`);
                     const matchingKey = Object.keys(requestMappings).find((key) =>
                       activityId.startsWith(key.replace("*", ""))
                     );
@@ -206,15 +211,15 @@
                   }
                 
                   return {
-                    scope: categoryData.scope || "Unknown",
-                    scopeCategory: categoryData.scopeCategory || "N/A",
-                    scopeCategoryName: categoryData.scopeCategoryName || "Unknown",
-                    kgCO2e: response?.co2e || "N/A",
-                    dataSource: request.emission_factor.source || "Unknown",
-                    yearUsed: request.emission_factor.year || "N/A",
-                    expensesCurrency: expensesCurrency,
-                    error: response?.error ? response.error.message : null,
-                    activityId: activityId, // ✅ Store activityId for debugging
+                    scope: categoryData?.scope ?? "Unknown",
+                    scopeCategory: categoryData?.scopeCategory ?? "N/A",
+                    scopeCategoryName: categoryData?.scopeCategoryName ?? "Unknown",
+                    kgCO2e: response?.co2e ?? "N/A",
+                    dataSource: response?.emission_factor?.source ?? "Unknown",
+                    yearUsed: response?.emission_factor?.year ?? "N/A",
+                    expensesCurrency: expensesCurrency ?? "Unknown",
+                    error: response?.error?.message ?? "None",
+                    activityId: activityId ?? "Unknown",
                   };
                 });
 
@@ -285,44 +290,70 @@
 
 
             return (
-                <div className="max-w-4xl mx-auto p-6">
-                  <h1 className="text-3xl font-bold mb-4">Company Emissions Report</h1>
-
-                  {isLoading ? (
-                    <p>Loading report...</p>
-                  ) : (
-                    <>
-                      {processedData.length > 0 ? (
-                        <div className="bg-white p-4 shadow rounded-md">
-                          {processedData.map((item, index) => (
-              <div key={index} className="mb-4 border-b pb-2">
-                <h2 className="font-bold text-xl">{item.scopeCategoryName}</h2>
-                <p>Scope: {item.scope}</p>
-                <p>Category: {item.scopeCategory}</p>
-                <p>Emissions: {item.kgCO2e} kgCO₂e</p>
-                <p>Data Source: {item.dataSource}</p>
-                <p>Emission Factor Year: {item.yearUsed}</p>
-
-                {/* ✅ Show API errors in red if present */}
-                {item.error && <p style={{ color: "red" }}>⚠️ Error: {item.error}</p>}
-
-                <button onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}>
-                  {expandedIndex === index ? "🔽 Hide Debug Info" : "▶ Show Debug Info"}
-                </button>
-                {expandedIndex === index && (
-                  <pre className="bg-gray-100 p-4 mt-2 text-sm overflow-auto">
-                  {JSON.stringify(apiLogs.find(log => log.request.emission_factor.activity_id === item.activityId) || {}, null, 2)}
-                  </pre>
+              <div className="max-w-4xl mx-auto p-6">
+                <h1 className="text-3xl font-bold mb-4">Company Emissions Report</h1>
+            
+                {isLoading ? (
+                  <p>Loading report...</p>
+                ) : (
+                  <>
+                    {processedData.length > 0 ? (
+                      <div className="bg-white p-4 shadow rounded-md">
+                        {processedData.map((item, index) => (
+                          <div key={index} className="mb-4 border-b pb-2">
+                            <h2 className="font-bold text-xl">{item.scopeCategoryName}</h2>
+                            <p>Scope: {item.scope}</p>
+                            <p>Category: {item.scopeCategory}</p>
+                            <p>Emissions: {item.kgCO2e} kgCO₂e</p>
+                            <p>Data Source: {item.dataSource}</p>
+                            <p>Emission Factor Year: {item.yearUsed}</p>
+            
+                            {/* ✅ Show API errors in red if present */}
+                            {item.error && <p style={{ color: "red" }}>⚠️ Error: {item.error}</p>}
+            
+                            <button onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}>
+                              {expandedIndex === index ? "🔽 Hide Debug Info" : "▶ Show Debug Info"}
+                            </button>
+                            {expandedIndex === index && (
+                              <pre className="bg-gray-100 p-4 mt-2 text-sm overflow-auto">
+                                {JSON.stringify(apiLogs.find(log => log.request.emission_factor.activity_id === item.activityId) || {}, null, 2)}
+                              </pre>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p>No report data available.</p>
+                    )}
+            
+                    {/* 🔍 Debugging UI - Displays Firestore keys & their matches */}
+                    <div className="bg-gray-100 p-4 rounded-md mt-4">
+                      <h2 className="text-lg font-bold">Debugging: Firestore Keys</h2>
+                      {Object.keys(userData).length > 0 ? (
+  <ul>
+    {Object.keys(userData).map((key) => (
+      <li key={key} className="text-sm">
+        {key} → {EXPENSE_EMISSION_FACTORS[key] || <span className="text-red-500">❌ No Match</span>}
+      </li>
+    ))}
+  </ul>
+) : (
+  <p>Loading Firestore data...</p>  // ✅ NEW: Prevents crash if `userData` is still empty
+)}
+                    </div>
+            
+                    <div className="bg-gray-100 p-4 rounded-md mt-4">
+                      <h2 className="text-lg font-bold">Debugging: Available Mappings</h2>
+                      <ul>
+                        {Object.entries(EXPENSE_EMISSION_FACTORS).map(([key, value]) => (
+                          <li key={key} className="text-sm">
+                            {key} → {value}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
                 )}
               </div>
-            ))}
-
-              </div>
-            ) : (
-              <p>No report data available.</p>
-            )}
-          </>
-        )}
-      </div>
-    );
+            );
   }
